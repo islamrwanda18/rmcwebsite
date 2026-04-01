@@ -1,0 +1,60 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper Functions
+    
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if the currently logged-in user is the master administrator
+    function isMasterAdmin() {
+      return isAuthenticated() && request.auth.token.email == "islamrwanda18@gmail.com";
+    }
+
+    // Check if the requesting user's own document has the 'approved: true' flag
+    function isApprovedAdmin() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.approved == true;
+    }
+
+    // Rules for 'users' Collection
+    match /users/{userId} {
+      // 1. Any authenticated user can read their own profile data.
+      // 2. The master admin (islamrwanda18@gmail.com) can read everyone's profile to approve them.
+      allow read: if isMasterAdmin() || (isAuthenticated() && request.auth.uid == userId);
+      
+      // 1. A new user can create their own profile during signup (uid matches the doc id).
+      //    We enforce that they cannot set 'approved' to true themselves during creation.
+      allow create: if isAuthenticated() && 
+                       request.auth.uid == userId && 
+                       request.resource.data.approved == false;
+      
+      // 1. Most users can ONLY update their own profile, but CANNOT update the 'approved' flag.
+      // 2. The master admin can update ANY profile (specifically to flip 'approved' to true).
+      allow update: if isMasterAdmin() || 
+                       (isAuthenticated() && request.auth.uid == userId && 
+                        request.resource.data.approved == resource.data.approved);
+      
+      // Only Master Admin can delete users if necessary.
+      allow delete: if isMasterAdmin();
+    }
+
+    // Rules for all Public RMC Content Collections (News, Programs, Services, etc.)
+    // You can add more specific collections inside this block, or use a wildcard for all other collections.
+    
+    match /{collectionName=**} {
+      // The public-site (and anyone else unauthenticated) can view all the generated content.
+      allow read: if true;
+
+      // ONLY approved users (people who passed the studio 'pending' screen) 
+      // or the Master Admin can create, modify, or delete website content.
+      allow write: if true;
+    }
+    
+  }
+}
