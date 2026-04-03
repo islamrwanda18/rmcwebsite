@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 
-const Home = ({ t }) => {
+const Home = ({ t, lang }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slides, setSlides] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
@@ -31,11 +31,11 @@ const Home = ({ t }) => {
             .map((n, i) => {
                const isEvent = n.type === "event";
                const isPast = isEvent && n.date && new Date(n.date) < new Date();
-               let tagDefault = "Recent News";
-               if (isEvent) tagDefault = isPast ? "Past Event" : "Upcoming Event";
+               let tagKey = "tag_recent_news";
+               if (isEvent) tagKey = isPast ? "tag_past_event" : "tag_upcoming_event";
                return {
                  img: n.imageLink || "https://i.postimg.cc/9XwG1JrT/gathering_1.jpg",
-                 tagDefault,
+                 tagKey,
                  colorTag: isPast ? "bg-gray-500" : i === 0 ? "bg-rmc-blue" : i === 1 ? "bg-rmc-dark-green" : "bg-rmc-green",
                  title: n.title,
                  desc: n.desc
@@ -46,7 +46,7 @@ const Home = ({ t }) => {
         if (recentCarousel.length === 0) {
            recentCarousel.push({
              img: "https://i.postimg.cc/9XwG1JrT/gathering_1.jpg",
-             tagDefault: "Latest Update",
+             tagKey: "tag_latest_update",
              colorTag: "bg-rmc-blue",
              title: "Welcome to RMC",
              desc: "The Rwanda Muslim Community official portal."
@@ -59,7 +59,7 @@ const Home = ({ t }) => {
         const activePosts = xpostsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
                                .filter(x => x.status === "on")
                                .sort((a,b) => b.createdAt - a.createdAt)
-                               .slice(0, 3);
+                               .slice(0, 6);
         setXposts(activePosts);
       } catch (err) {
         console.error(err);
@@ -68,26 +68,40 @@ const Home = ({ t }) => {
     fetchHomeData();
   }, []);
 
-  // Reload Twitter widgets when xposts change so embedded images render
+  // Reload all social platform widgets when xposts change
   useEffect(() => {
-    if (xposts.length > 0 && window.twttr && window.twttr.widgets) {
-      window.twttr.widgets.load();
-    }
+    if (xposts.length === 0) return;
+    
+    const reloadTimer = setTimeout(() => {
+      // Twitter / X
+      if (window.twttr && window.twttr.widgets) {
+        window.twttr.widgets.load();
+      }
+      // Instagram
+      if (window.instgrm && window.instgrm.Embeds) {
+        window.instgrm.Embeds.process();
+      }
+      // Facebook
+      if (window.FB && window.FB.XFBML) {
+        window.FB.XFBML.parse();
+      }
+    }, 300);
+
+    return () => clearTimeout(reloadTimer);
   }, [xposts]);
 
   // Social carousel scroll helpers
   const updateScrollButtons = useCallback(() => {
     const el = socialScrollRef.current;
     if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollLeft(el.scrollLeft > 1);
     setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
   }, []);
 
   useEffect(() => {
     const el = socialScrollRef.current;
     if (!el) return;
-    // Initial check after a slight delay for content to render
-    const timer = setTimeout(updateScrollButtons, 500);
+    const timer = setTimeout(updateScrollButtons, 800);
     el.addEventListener("scroll", updateScrollButtons);
     window.addEventListener("resize", updateScrollButtons);
     return () => {
@@ -134,7 +148,7 @@ const Home = ({ t }) => {
                 style={{ backgroundImage: `url('${slide.img}')` }}
               >
                 <div className="carousel-content">
-                  <span className={`${slide.colorTag} text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide mb-2 inline-block`} dangerouslySetInnerHTML={{ __html: t(slide.tagKey) || slide.tagDefault }}></span>
+                  <span className={`${slide.colorTag} text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide mb-2 inline-block`}>{t(slide.tagKey)}</span>
                   <h3 className="text-3xl md:text-4xl font-bold mb-2">{slide.title}</h3>
                   <p className="text-gray-200 md:text-lg">{slide.desc}</p>
                 </div>
@@ -147,11 +161,8 @@ const Home = ({ t }) => {
       {/* Brief About Section */}
       <div className="bg-white py-12 border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center slide-up">
-          <h2 className="text-2xl font-bold text-rmc-dark-green mb-4" dangerouslySetInnerHTML={{ __html: t("head_who_we_are") }}></h2>
-          <p className="text-gray-600 leading-relaxed max-w-3xl mx-auto">
-            The <strong>Rwanda Muslim Community (RMC)</strong> is the apex body representing the Islamic faith and interests in Rwanda. 
-            Headquartered in Kigali and operating under the leadership of the Mufti of Rwanda, we are dedicated to spiritual guidance, educational advancement, and the socio-economic development of all Rwandans.
-          </p>
+          <h2 className="text-2xl font-bold text-rmc-dark-green mb-4">{t("head_who_we_are")}</h2>
+          <p className="text-gray-600 leading-relaxed max-w-3xl mx-auto" dangerouslySetInnerHTML={{ __html: t("home_about_text") }}></p>
         </div>
       </div>
 
@@ -159,29 +170,29 @@ const Home = ({ t }) => {
       <div className="bg-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-rmc-black mb-2" dangerouslySetInnerHTML={{ __html: t("head_areas") }}></h2>
+            <h2 className="text-3xl font-bold text-rmc-black mb-2">{t("head_areas")}</h2>
             <div className="w-24 h-1 bg-rmc-green mx-auto rounded"></div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="bg-white p-6 rounded-xl shadow-md text-center hover:-translate-y-1 transition transform border-t-4 border-rmc-blue">
               <div className="w-16 h-16 bg-blue-50 text-rmc-blue rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i className="fas fa-book-open"></i></div>
-              <h3 className="font-bold text-lg mb-2">Dawah</h3>
-              <p className="text-gray-500 text-sm">Spreading the true teachings of Islam through peaceful outreach and guidance.</p>
+              <h3 className="font-bold text-lg mb-2">{t("area_dawah")}</h3>
+              <p className="text-gray-500 text-sm">{t("area_dawah_desc")}</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-md text-center hover:-translate-y-1 transition transform border-t-4 border-rmc-green">
               <div className="w-16 h-16 bg-green-50 text-rmc-green rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i className="fas fa-hands-helping"></i></div>
-              <h3 className="font-bold text-lg mb-2">Socio Development</h3>
-              <p className="text-gray-500 text-sm">Empowering communities through health, poverty alleviation, and welfare initiatives.</p>
+              <h3 className="font-bold text-lg mb-2">{t("area_socio")}</h3>
+              <p className="text-gray-500 text-sm">{t("area_socio_desc")}</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-md text-center hover:-translate-y-1 transition transform border-t-4 border-yellow-500">
               <div className="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i className="fas fa-graduation-cap"></i></div>
-              <h3 className="font-bold text-lg mb-2">Education</h3>
-              <p className="text-gray-500 text-sm">Providing quality secular and Islamic education to the youth across the nation.</p>
+              <h3 className="font-bold text-lg mb-2">{t("area_education")}</h3>
+              <p className="text-gray-500 text-sm">{t("area_education_desc")}</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-md text-center hover:-translate-y-1 transition transform border-t-4 border-rmc-black">
               <div className="w-16 h-16 bg-gray-100 text-rmc-black rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i className="fas fa-globe-africa"></i></div>
-              <h3 className="font-bold text-lg mb-2">Foreign Affairs</h3>
-              <p className="text-gray-500 text-sm">Building and maintaining strong international relations and partnerships.</p>
+              <h3 className="font-bold text-lg mb-2">{t("area_foreign")}</h3>
+              <p className="text-gray-500 text-sm">{t("area_foreign_desc")}</p>
             </div>
           </div>
         </div>
@@ -191,23 +202,23 @@ const Home = ({ t }) => {
       <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-rmc-black mb-2" dangerouslySetInnerHTML={{ __html: t("head_activities") }}></h2>
+            <h2 className="text-3xl font-bold text-rmc-black mb-2">{t("head_activities")}</h2>
             <div className="w-24 h-1 bg-rmc-blue mx-auto rounded"></div>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="md:col-span-2 relative rounded-xl overflow-hidden shadow-lg group">
               <img src="https://i.postimg.cc/9XwG1JrT/gathering_1.jpg" alt="Recent Event" className="w-full h-80 object-cover group-hover:scale-105 transition duration-500" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex flex-col justify-end p-6">
-                <span className="bg-rmc-green text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide w-max mb-2">Recent Event</span>
-                <h3 className="text-2xl font-bold text-white mb-2">National Unity Conference with President</h3>
-                <p className="text-gray-300 text-sm">A major gathering with President focused on community development and interfaith dialogue held recently in Kigali.</p>
+                <span className="bg-rmc-green text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide w-max mb-2">{t("tag_recent_event")}</span>
+                <h3 className="text-2xl font-bold text-white mb-2">{t("activity_title")}</h3>
+                <p className="text-gray-300 text-sm">{t("activity_desc")}</p>
               </div>
             </div>
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-              <h3 className="text-xl font-bold mb-4 text-rmc-dark-green"><i className="fas fa-calendar-alt mr-2"></i>Upcoming</h3>
+              <h3 className="text-xl font-bold mb-4 text-rmc-dark-green"><i className="fas fa-calendar-alt mr-2"></i>{t("upcoming_label")}</h3>
               <div className="space-y-4">
                 {upcoming.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No upcoming events scheduled.</p>
+                  <p className="text-gray-500 text-sm">{t("no_upcoming")}</p>
                 ) : upcoming.map(event => (
                   <div key={event.id} className="border-b border-gray-200 pb-4">
                     <p className="text-xs text-rmc-blue font-bold mb-1">{event.date}</p>
@@ -215,7 +226,7 @@ const Home = ({ t }) => {
                   </div>
                 ))}
               </div>
-              <Link to="/news" className="mt-4 block w-full text-center text-sm font-bold text-rmc-green hover:underline">View All Events &rarr;</Link>
+              <Link to="/news" className="mt-4 block w-full text-center text-sm font-bold text-rmc-green hover:underline">{t("view_all_events")} &rarr;</Link>
             </div>
           </div>
         </div>
@@ -225,19 +236,19 @@ const Home = ({ t }) => {
       <div className="relative bg-rmc-dark-green py-16 overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-10 bg-cover bg-center" style={{ backgroundImage: "url('https://i.postimg.cc/7hbDM5xH/EID_2025.jpg')" }}></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 slide-up text-center text-white">
-          <h2 className="text-3xl font-bold mb-12">RMC in Numbers</h2>
+          <h2 className="text-3xl font-bold mb-12">{t("head_stats")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-gray-400/30">
             <div className="p-4">
               <div className="text-5xl font-bold mb-2 tabular-nums">500,000+</div>
-              <div className="text-rmc-green-100 text-lg uppercase tracking-wide">Muslims in Rwanda</div>
+              <div className="text-rmc-green-100 text-lg uppercase tracking-wide">{t("stat_muslims")}</div>
             </div>
             <div className="p-4">
               <div className="text-5xl font-bold mb-2 tabular-nums">50+</div>
-              <div className="text-rmc-green-100 text-lg uppercase tracking-wide">Islamic Schools</div>
+              <div className="text-rmc-green-100 text-lg uppercase tracking-wide">{t("stat_schools")}</div>
             </div>
             <div className="p-4">
               <div className="text-5xl font-bold mb-2 tabular-nums">500+</div>
-              <div className="text-rmc-green-100 text-lg uppercase tracking-wide">Masjids</div>
+              <div className="text-rmc-green-100 text-lg uppercase tracking-wide">{t("stat_masjids")}</div>
             </div>
           </div>
         </div>
@@ -247,13 +258,13 @@ const Home = ({ t }) => {
       <div className="bg-gray-100 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-rmc-black mb-2"><i className="fas fa-share-alt text-rmc-green mr-2"></i>Latest from Social Accounts</h2>
+            <h2 className="text-3xl font-bold text-rmc-black mb-2"><i className="fas fa-share-alt text-rmc-green mr-2"></i>{t("head_social")}</h2>
             <div className="w-24 h-1 bg-rmc-green mx-auto rounded"></div>
-            <p className="text-gray-500 mt-2 text-sm">Stay connected with our real-time updates.</p>
+            <p className="text-gray-500 mt-2 text-sm">{t("social_subtitle")}</p>
           </div>
 
           {xposts.length === 0 ? (
-            <p className="text-gray-400 text-center">No active posts available.</p>
+            <p className="text-gray-400 text-center">{t("no_posts")}</p>
           ) : (
             <div className="relative">
               {/* Left Arrow */}

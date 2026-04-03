@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="html-root">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,6 +25,13 @@
   <body class="bg-gray-50 text-rmc-black font-sans min-h-screen flex flex-col overflow-x-hidden">
     <div id="root" class="w-full flex flex-col flex-grow"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Twitter / X embeds -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    <!-- Instagram embeds -->
+    <script async src="//www.instagram.com/embed.js"></script>
+    <!-- Facebook embeds -->
+    <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0" nonce="auto"></script>
   </body>
 </html>

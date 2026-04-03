@@ -41,26 +41,26 @@ const About = ({ t }) => {
     <div className="bg-gray-50 py-16 min-h-screen fade-in">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-rmc-black mb-2" dangerouslySetInnerHTML={{ __html: t("head_about") }}></h2>
+          <h2 className="text-4xl font-bold text-rmc-black mb-2">{t("head_about")}</h2>
           <div className="w-24 h-1 bg-rmc-green mx-auto rounded"></div>
-          <p className="mt-4 text-gray-600">Learn about our foundation, leadership, and vision.</p>
+          <p className="mt-4 text-gray-600">{t("about_subtitle")}</p>
         </div>
 
         <div className="space-y-4">
           {/* Accordion 1: Mission and Vision */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <button className="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none hover:bg-gray-50" onClick={() => toggleAccordion('acc-mission')}>
-              <span className="font-bold text-xl text-rmc-dark-green">Mission and Vision</span>
+              <span className="font-bold text-xl text-rmc-dark-green">{t("mission_vision")}</span>
               <i className={`fas ${openAccordion === 'acc-mission' ? 'fa-minus' : 'fa-plus'} text-gray-400`}></i>
             </button>
             <div className="accordion-content bg-white" style={{ maxHeight: openAccordion === 'acc-mission' ? "500px" : "0px" }}>
               <div className="px-6 pb-5 pt-4 text-gray-600 border-t border-gray-100 flex flex-col md:flex-row gap-8">
                 <div className="flex-1">
-                  <h4 className="font-bold text-gray-800 mb-2">Our Mission</h4>
+                  <h4 className="font-bold text-gray-800 mb-2">{t("our_mission")}</h4>
                   <p className="whitespace-pre-wrap text-sm leading-relaxed">{globals.mission}</p>
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-bold text-gray-800 mb-2">Our Vision</h4>
+                  <h4 className="font-bold text-gray-800 mb-2">{t("our_vision")}</h4>
                   <p className="whitespace-pre-wrap text-sm leading-relaxed">{globals.vision}</p>
                 </div>
               </div>
@@ -70,7 +70,7 @@ const About = ({ t }) => {
           {/* Accordion 2: Our History */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <button className="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none hover:bg-gray-50" onClick={() => toggleAccordion('acc-history')}>
-              <span className="font-bold text-xl text-rmc-dark-green">Our History</span>
+              <span className="font-bold text-xl text-rmc-dark-green">{t("our_history")}</span>
               <i className={`fas ${openAccordion === 'acc-history' ? 'fa-minus' : 'fa-plus'} text-gray-400`}></i>
             </button>
             <div className="accordion-content bg-white" style={{ maxHeight: openAccordion === 'acc-history' ? "500px" : "0px" }}>
@@ -83,7 +83,7 @@ const About = ({ t }) => {
           {/* Accordion 3: Board Members */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <button className="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none hover:bg-gray-50" onClick={() => toggleAccordion('acc-board')}>
-              <span className="font-bold text-xl text-rmc-dark-green">The Board Members</span>
+              <span className="font-bold text-xl text-rmc-dark-green">{t("board_members")}</span>
               <i className={`fas ${openAccordion === 'acc-board' ? 'fa-minus' : 'fa-plus'} text-gray-400`}></i>
             </button>
             <div className="accordion-content bg-white" style={{ maxHeight: openAccordion === 'acc-board' ? "500px" : "0px" }}>
@@ -106,7 +106,7 @@ const About = ({ t }) => {
           {/* Accordion 4: Partners */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <button className="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none hover:bg-gray-50" onClick={() => toggleAccordion('acc-partners')}>
-              <span className="font-bold text-xl text-rmc-dark-green">Partners</span>
+              <span className="font-bold text-xl text-rmc-dark-green">{t("partners")}</span>
               <i className={`fas ${openAccordion === 'acc-partners' ? 'fa-minus' : 'fa-plus'} text-gray-400`}></i>
             </button>
             <div className="accordion-content bg-white" style={{ maxHeight: openAccordion === 'acc-partners' ? "500px" : "0px" }}>

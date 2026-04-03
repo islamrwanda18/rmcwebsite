@@ -93,4 +93,40 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
   }
+
+  /* Ensure social embed cards render properly */
+  .social-card iframe {
+      max-width: 100% !important;
+      width: 100% !important;
+  }
+  .social-card .twitter-tweet,
+  .social-card .instagram-media,
+  .social-card .fb-post {
+      margin: 0 !important;
+      max-width: 100% !important;
+  }
 }
+
+/* RTL Support for Arabic */
+[dir="rtl"] .border-l-4 {
+  border-left-width: 0;
+  border-right-width: 4px;
+}
+[dir="rtl"] .pl-3 {
+  padding-left: 0;
+  padding-right: 0.75rem;
+}
+[dir="rtl"] .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+[dir="rtl"] .mr-3 { margin-right: 0; margin-left: 0.75rem; }
+[dir="rtl"] .mr-4 { margin-right: 0; margin-left: 1rem; }
+[dir="rtl"] .ml-3 { margin-left: 0; margin-right: 0.75rem; }
+[dir="rtl"] .space-x-4 > :not(:last-child) {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+[dir="rtl"] .space-x-6 > :not(:last-child) {
+  margin-right: 0;
+  margin-left: 1.5rem;
+}
+[dir="rtl"] .text-left { text-align: right; }
+[dir="rtl"] .text-right { text-align: left; }

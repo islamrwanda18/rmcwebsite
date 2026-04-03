@@ -60,6 +60,7 @@ const Navbar = ({ lang, setLang, t }) => {
               <option value="rw">🇷🇼 RW</option>
               <option value="fr">🇫🇷 FR</option>
               <option value="sw">🇹🇿 SW</option>
+              <option value="ar">🇸🇦 AR</option>
             </select>
             
             <button className="lg:hidden text-gray-500 hover:text-rmc-green focus:outline-none" onClick={toggleMobileMenu}>

@@ -29,9 +29,9 @@ const Services = ({ t }) => {
     <div className="bg-gray-50 py-16 min-h-screen fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-rmc-black mb-2" dangerouslySetInnerHTML={{ __html: t("head_services") }}></h2>
+          <h2 className="text-4xl font-bold text-rmc-black mb-2">{t("head_services")}</h2>
           <div className="w-24 h-1 bg-rmc-green mx-auto rounded"></div>
-          <p className="mt-4 text-gray-600">Access official services provided by the Rwanda Muslim Community.</p>
+          <p className="mt-4 text-gray-600">{t("services_subtitle")}</p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -49,7 +49,7 @@ const Services = ({ t }) => {
               <div className="p-6 text-center flex-1 flex flex-col">
                 <h3 className="text-xl font-bold mb-2 text-rmc-dark-green">{service.title}</h3>
                 <p className="text-gray-500 text-sm mb-4 flex-1">{service.desc}</p>
-                <span className="text-rmc-green font-bold text-sm">Access Service &rarr;</span>
+                <span className="text-rmc-green font-bold text-sm">{t("access_service")} &rarr;</span>
               </div>
             </a>
           ))}

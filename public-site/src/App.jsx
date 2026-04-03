@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -19,14 +19,27 @@ function App() {
     return translations[lang] && translations[lang][key] ? translations[lang][key] : key;
   };
 
+  // Handle RTL for Arabic and update the html lang attribute
+  useEffect(() => {
+    const htmlEl = document.getElementById("html-root") || document.documentElement;
+    htmlEl.setAttribute("lang", lang);
+    if (lang === "ar") {
+      htmlEl.setAttribute("dir", "rtl");
+      document.body.style.fontFamily = "'Amiri', 'Poppins', sans-serif";
+    } else {
+      htmlEl.setAttribute("dir", "ltr");
+      document.body.style.fontFamily = "'Poppins', sans-serif";
+    }
+  }, [lang]);
+
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
+      <div className={`flex flex-col min-h-screen ${lang === 'ar' ? 'text-right' : ''}`}>
         <Navbar lang={lang} setLang={setLang} t={t} />
         
         <main className="flex-grow">
           <Routes>
-            <Route path="/" element={<Home t={t} />} />
+            <Route path="/" element={<Home t={t} lang={lang} />} />
             <Route path="/services" element={<Services t={t} />} />
             <Route path="/program" element={<Program t={t} />} />
             <Route path="/news" element={<News t={t} />} />
@@ -35,7 +48,7 @@ function App() {
           </Routes>
         </main>
         
-        <Footer />
+        <Footer t={t} />
       </div>
     </Router>
   );
