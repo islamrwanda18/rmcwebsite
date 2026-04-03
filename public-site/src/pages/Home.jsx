@@ -1,37 +1,66 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
 
 const Home = ({ t }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const slides = [
-    {
-      img: "https://i.postimg.cc/9XwG1JrT/gathering_1.jpg",
-      tagKey: "tag_latest_event",
-      tagDefault: "Latest Event",
-      colorTag: "bg-rmc-blue",
-      title: "Meeting the President",
-      desc: "A historic gathering demonstrating the strong unity and collaboration between the Rwanda Muslim Community and national leadership."
-    },
-    {
-      img: "https://i.postimg.cc/Y2L18bht/MUSABAQAT_1.jpg",
-      tagKey: "tag_recent_program",
-      tagDefault: "Recent Program",
-      colorTag: "bg-rmc-dark-green",
-      title: "International Qur'an Recitation",
-      desc: "Hosting talented reciters from across the globe in Kigali, promoting spiritual literacy and peaceful understanding."
-    },
-    {
-      img: "https://i.postimg.cc/qqg0XNk7/EID_2024.jpg",
-      tagKey: "tag_upcoming_event",
-      tagDefault: "Upcoming Event",
-      colorTag: "bg-rmc-green",
-      title: "Eid Al-Fitr Preparations",
-      desc: "Join thousands of Muslims at the regional stadium to perform Eid prayers, reflecting the growth and unity of the community."
-    }
-  ];
+  const [slides, setSlides] = useState([]);
+  const [upcoming, setUpcoming] = useState([]);
+  const [xposts, setXposts] = useState([]);
 
   useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        const [newsSnap, xpostsSnap] = await Promise.all([
+          getDocs(collection(db, "news")),
+          getDocs(collection(db, "xposts"))
+        ]);
+
+        const newsList = newsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const events = newsList.filter(n => n.type === "event" && new Date(n.date) >= new Date())
+                               .sort((a,b) => new Date(a.date) - new Date(b.date));
+                               
+        // Setup Carousel with top 3 newest entries (news or event)
+        const recentCarousel = [...newsList]
+            .sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0))
+            .slice(0, 3)
+            .map((n, i) => ({
+               img: n.imageLink || "https://i.postimg.cc/9XwG1JrT/gathering_1.jpg",
+               tagDefault: n.type === "event" ? "Upcoming Event" : "Recent News",
+               colorTag: i === 0 ? "bg-rmc-blue" : i === 1 ? "bg-rmc-dark-green" : "bg-rmc-green",
+               title: n.title,
+               desc: n.desc
+            }));
+            
+        // Fallback slides if none found
+        if (recentCarousel.length === 0) {
+           recentCarousel.push({
+             img: "https://i.postimg.cc/9XwG1JrT/gathering_1.jpg",
+             tagDefault: "Latest Update",
+             colorTag: "bg-rmc-blue",
+             title: "Welcome to RMC",
+             desc: "The Rwanda Muslim Community official portal."
+           });
+        }
+        
+        setSlides(recentCarousel);
+        setUpcoming(events.slice(0, 3));
+
+        const activePosts = xpostsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+                               .filter(x => x.status === "on")
+                               .sort((a,b) => b.createdAt - a.createdAt)
+                               .slice(0, 3);
+        setXposts(activePosts);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchHomeData();
+  }, []);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 6000);
@@ -132,18 +161,14 @@ const Home = ({ t }) => {
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
               <h3 className="text-xl font-bold mb-4 text-rmc-dark-green"><i className="fas fa-calendar-alt mr-2"></i>Upcoming</h3>
               <div className="space-y-4">
-                <div className="border-b border-gray-200 pb-4">
-                  <p className="text-xs text-rmc-blue font-bold mb-1">May 25, 2026</p>
-                  <h4 className="font-bold text-gray-800 leading-tight">Eid Al'adha</h4>
-                </div>
-                <div className="border-b border-gray-200 pb-4">
-                  <p className="text-xs text-rmc-blue font-bold mb-1">July 2, 2026</p>
-                  <h4 className="font-bold text-gray-800 leading-tight">Annual Dawah Seminar</h4>
-                </div>
-                <div>
-                  <p className="text-xs text-rmc-blue font-bold mb-1">August 10, 2026</p>
-                  <h4 className="font-bold text-gray-800 leading-tight">Islamic Education Fundraiser</h4>
-                </div>
+                {upcoming.length === 0 ? (
+                  <p className="text-gray-500 text-sm">No upcoming events scheduled.</p>
+                ) : upcoming.map(event => (
+                  <div key={event.id} className="border-b border-gray-200 pb-4">
+                    <p className="text-xs text-rmc-blue font-bold mb-1">{event.date}</p>
+                    <h4 className="font-bold text-gray-800 leading-tight">{event.title}</h4>
+                  </div>
+                ))}
               </div>
               <Link to="/news" className="mt-4 block w-full text-center text-sm font-bold text-rmc-green hover:underline">View All Events &rarr;</Link>
             </div>
@@ -183,15 +208,11 @@ const Home = ({ t }) => {
           </div>
           
           <div className="flex flex-col items-center space-y-6">
-            <div className="w-full max-w-[550px]">
-              <blockquote className="twitter-tweet"><p lang="in" dir="ltr">Kuri iki Cyumweru, Nyakubahwa Mufti w’u Rwanda Sheikh Sindayigaya Musa yakiriye mu biro bye Visi Perezida ushinzwe amasomo muri Africa School of Governance Prof. Amany El-Sharif hamwe n’abari bamuherekeje.<br/>Ibiganiro ku mpande zombi bikaba byibanze kugusangira amahirwe ku mpande… <a href="https://t.co/AkvWqFnlMN">pic.twitter.com/AkvWqFnlMN</a></p>&mdash; Rwanda Muslim Community (@islamrwanda) <a href="https://twitter.com/islamrwanda/status/2038375707600908754?ref_src=twsrc%5Etfw">March 29, 2026</a></blockquote>
-            </div>
-            <div className="w-full max-w-[550px]">
-              <blockquote className="twitter-tweet"><p lang="en" dir="ltr">On this Sunday, the Mufti of Rwanda, Sheikh Sindayigaya Musa, received in his office Prof. Amany El-Sharif, Vice-President for Academic Affairs at the Africa School of Governance, together with his delegation.<br/>Their discussions focused on exploring opportunities in education and… <a href="https://t.co/rGDMh7XfMy">pic.twitter.com/rGDMh7XfMy</a></p>&mdash; Rwanda Muslim Community (@islamrwanda) <a href="https://twitter.com/islamrwanda/status/2038374714222227693?ref_src=twsrc%5Etfw">March 29, 2026</a></blockquote>
-            </div>
-            <div className="w-full max-w-[550px]">
-              <blockquote className="twitter-tweet"><p lang="en" dir="ltr">The Rwanda Muslim Community (<a href="https://twitter.com/hashtag/RMC?src=hash&amp;ref_src=twsrc%5Etfw">#RMC</a>) extends its profound gratitude to His Excellency, the President of the Republic of Rwanda, <a href="https://twitter.com/PaulKagame?ref_src=twsrc%5Etfw">@PaulKagame</a>, for the time He graciously devoted to celebrating Eid Al-Fitr with the Muslim community in Rwanda. The Community further expresses its… <a href="https://t.co/vWc83iBPV5">pic.twitter.com/vWc83iBPV5</a></p>&mdash; Rwanda Muslim Community (@islamrwanda) <a href="https://twitter.com/islamrwanda/status/2036926813079801859?ref_src=twsrc%5Etfw">March 25, 2026</a></blockquote>
-            </div>
+            {xposts.length === 0 ? (
+               <p className="text-gray-400">No active posts available.</p>
+            ) : xposts.map(post => (
+               <div key={post.id} className="w-full max-w-[550px]" dangerouslySetInnerHTML={{ __html: post.embedCode }} />
+            ))}
           </div>
         </div>
       </div>

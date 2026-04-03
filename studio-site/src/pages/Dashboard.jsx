@@ -3,6 +3,11 @@ import { useAuth } from "../context/AuthContext";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import UserManagement from "../components/UserManagement";
+import BasicCMS from "../components/cms/BasicCMS";
+import NewsCMS from "../components/cms/NewsCMS";
+import BoardCMS from "../components/cms/BoardCMS";
+import SingletonCMS from "../components/cms/SingletonCMS";
+import XPostsCMS from "../components/cms/XPostsCMS";
 
 export default function Dashboard() {
   const { userData } = useAuth();
@@ -84,22 +89,48 @@ export default function Dashboard() {
 
         {/* Content Area */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-8 shadow-inner">
-          {activeTab === "users" ? (
-            <UserManagement />
-          ) : (
-            <div className="bg-white rounded-xl shadow border border-gray-100 p-8 flex flex-col items-center justify-center h-full min-h-[400px]">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-4xl text-gray-400 mb-6">
-                 <i className={`fas ${menuItems.find(m => m.id === activeTab)?.icon}`}></i>
-              </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Configure {menuItems.find(m => m.id === activeTab)?.label}</h3>
-              <p className="text-center text-gray-500 max-w-md">
-                This panel is dynamically hooked. Creating new entries will immediately sync this content block directly out to the Firebase Firestore Collections for the public site to read later.
-              </p>
-              <button className="mt-8 bg-rmc-blue text-white px-6 py-2 rounded-lg font-bold shadow hover:bg-blue-800 transition">
-                + Add New Entry
-              </button>
-            </div>
+          {activeTab === "users" && <UserManagement />}
+          
+          {activeTab === "services" && (
+            <BasicCMS collectionName="services" titleLabel="Services" fields={[
+              { name: "title", label: "Title", type: "text" },
+              { name: "imageLink", label: "Thumbnail Link (Direct Image URL)", type: "url", optional: true },
+              { name: "desc", label: "Description", type: "textarea", wordLimit: 50 },
+              { name: "icon", label: "FontAwesome Icon Class (Fallback)", type: "text", optional: true }
+            ]} />
           )}
+
+          {activeTab === "programs" && (
+            <BasicCMS collectionName="programs" titleLabel="Programs" fields={[
+              { name: "title", label: "Title", type: "text" },
+              { name: "imageLink", label: "Thumbnail Link (Direct Image URL)", type: "url", optional: true },
+              { name: "desc", label: "Description", type: "textarea", wordLimit: 50 },
+              { name: "icon", label: "FontAwesome Icon Class (Fallback)", type: "text", optional: true }
+            ]} />
+          )}
+
+          {activeTab === "news" && <NewsCMS />}
+          
+          {activeTab === "board" && <BoardCMS />}
+
+          {activeTab === "partners" && (
+            <BasicCMS collectionName="partners" titleLabel="Partners" fields={[
+              { name: "name", label: "Name", type: "text" },
+              { name: "logoLink", label: "Logo Image Link (Direct URL)", type: "url" },
+              { name: "sector", label: "Sector", type: "text" }
+            ]} />
+          )}
+
+          {activeTab === "mission" && <SingletonCMS titleLabel="Mission and Vision" fields={[
+            { key: "mission", label: "Mission Statement" },
+            { key: "vision", label: "Vision Statement" }
+          ]} />}
+          
+          {activeTab === "history" && <SingletonCMS titleLabel="History" fields={[
+            { key: "history", label: "RMC History" }
+          ]} />}
+
+          {activeTab === "xposts" && <XPostsCMS />}
         </main>
       </div>
 

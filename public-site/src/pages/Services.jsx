@@ -1,4 +1,30 @@
+import { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
+
 const Services = ({ t }) => {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "services"));
+        const servicesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setServices(servicesList);
+      } catch (err) {
+        console.error("Error fetching services:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  if (loading) {
+     return <div className="min-h-screen flex items-center justify-center bg-gray-50"><i className="fas fa-spinner fa-spin text-4xl text-rmc-green"></i></div>;
+  }
+
   return (
     <div className="bg-gray-50 py-16 min-h-screen fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
@@ -9,60 +35,24 @@ const Services = ({ t }) => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <a href="https://rmc-brown.vercel.app/" target="_blank" rel="noreferrer" className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 block border border-gray-100">
-            <div className="h-32 bg-gradient-to-r from-rmc-blue to-blue-600 flex items-center justify-center text-white text-4xl">
-              <i className="fas fa-graduation-cap"></i>
-            </div>
-            <div className="p-6 text-center">
-              <h3 className="text-xl font-bold mb-2 text-rmc-dark-green">Education Services</h3>
-              <p className="text-gray-500 text-sm mb-4">Registration, management, and coordination of Islamic educational institutions.</p>
-              <span className="text-rmc-blue font-bold text-sm">Access Service &rarr;</span>
-            </div>
-          </a>
-          
-          <a href="https://rmc-brown.vercel.app/" target="_blank" rel="noreferrer" className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 block border border-gray-100">
-            <div className="h-32 bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center text-white text-4xl">
-              <i className="fas fa-ring"></i>
-            </div>
-            <div className="p-6 text-center">
-              <h3 className="text-xl font-bold mb-2 text-rmc-dark-green">Marriage Services</h3>
-              <p className="text-gray-500 text-sm mb-4">Facilitating Islamic marriages (Nikah), counseling, and official certifications.</p>
-              <span className="text-pink-600 font-bold text-sm">Access Service &rarr;</span>
-            </div>
-          </a>
-
-          <a href="https://rmc-brown.vercel.app/" target="_blank" rel="noreferrer" className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 block border border-gray-100">
-            <div className="h-32 bg-gradient-to-r from-gray-700 to-gray-900 flex items-center justify-center text-white text-4xl">
-              <i className="fas fa-bed"></i>
-            </div>
-            <div className="p-6 text-center">
-              <h3 className="text-xl font-bold mb-2 text-rmc-dark-green">Funeral Services</h3>
-              <p className="text-gray-500 text-sm mb-4">Respectful handling of Janazah and burial arrangements according to Islamic principles.</p>
-              <span className="text-gray-800 font-bold text-sm">Access Service &rarr;</span>
-            </div>
-          </a>
-
-          <a href="https://rmc-brown.vercel.app/" target="_blank" rel="noreferrer" className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 block border border-gray-100">
-            <div className="h-32 bg-gradient-to-r from-rmc-green to-emerald-600 flex items-center justify-center text-white text-4xl">
-              <i className="fas fa-book-reader"></i>
-            </div>
-            <div className="p-6 text-center">
-              <h3 className="text-xl font-bold mb-2 text-rmc-dark-green">Dawah Services</h3>
-              <p className="text-gray-500 text-sm mb-4">Requesting scholars, literature, and programs to learn more about Islam.</p>
-              <span className="text-rmc-green font-bold text-sm">Access Service &rarr;</span>
-            </div>
-          </a>
-
-          <a href="https://rmc-brown.vercel.app/" target="_blank" rel="noreferrer" className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 block border border-gray-100">
-            <div className="h-32 bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center text-white text-4xl">
-              <i className="fas fa-hands-helping"></i>
-            </div>
-            <div className="p-6 text-center">
-              <h3 className="text-xl font-bold mb-2 text-rmc-dark-green">Socio-development Services</h3>
-              <p className="text-gray-500 text-sm mb-4">Zakat and Sadaqah distribution, health, and community welfare programs.</p>
-              <span className="text-orange-600 font-bold text-sm">Access Service &rarr;</span>
-            </div>
-          </a>
+          {services.map((service, index) => (
+            <a key={service.id || index} href="https://rmc-brown.vercel.app/" target="_blank" rel="noreferrer" className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 block border border-gray-100 flex flex-col h-full">
+              {service.imageLink && service.imageLink !== 'https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg' ? (
+                <div className="h-32 w-full">
+                   <img src={service.imageLink} alt={service.title} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="h-32 flex items-center justify-center text-white text-4xl" style={{ background: service.thumbStyle || 'linear-gradient(to right, #059669, #059669)' }}>
+                  <i className={`fas ${service.icon || 'fa-info-circle'}`}></i>
+                </div>
+              )}
+              <div className="p-6 text-center flex-1 flex flex-col">
+                <h3 className="text-xl font-bold mb-2 text-rmc-dark-green">{service.title}</h3>
+                <p className="text-gray-500 text-sm mb-4 flex-1">{service.desc}</p>
+                <span className="text-rmc-green font-bold text-sm">Access Service &rarr;</span>
+              </div>
+            </a>
+          ))}
         </div>
       </div>
     </div>

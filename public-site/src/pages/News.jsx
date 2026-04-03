@@ -1,4 +1,31 @@
+import { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
+
 const News = ({ t }) => {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "news"));
+        setItems(querySnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNews();
+  }, []);
+
+  const upcomingEvents = items.filter(i => i.type === "event" && i.date && new Date(i.date) >= new Date());
+  const pastEvents = items.filter(i => i.type === "event" && i.date && new Date(i.date) < new Date());
+  const newsEntries = items.filter(i => i.type === "news");
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><i className="fas fa-spinner fa-spin text-4xl text-rmc-green"></i></div>;
+
   return (
     <div className="bg-white py-16 min-h-screen fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
@@ -13,58 +40,61 @@ const News = ({ t }) => {
         {/* Upcoming Events */}
         <h3 className="text-2xl font-bold text-rmc-dark-green mb-6 border-l-4 border-rmc-dark-green pl-3">Upcoming Events</h3>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm">
-            <span className="bg-rmc-blue text-white text-[10px] font-bold px-2 py-1 rounded uppercase mb-2 inline-block">Event</span>
-            <h4 className="font-bold text-lg text-gray-900 mb-1">Eid Al'adha</h4>
-            <p className="text-sm text-gray-500 mb-3"><i className="fas fa-calendar mr-1"></i> June 15, 2026</p>
-            <p className="text-gray-600 text-sm">Eid celebrations at the regional stadium.</p>
-          </div>
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm">
-            <span className="bg-rmc-blue text-white text-[10px] font-bold px-2 py-1 rounded uppercase mb-2 inline-block">Seminar</span>
-            <h4 className="font-bold text-lg text-gray-900 mb-1">Annual Dawah Seminar</h4>
-            <p className="text-sm text-gray-500 mb-3"><i className="fas fa-calendar mr-1"></i> July 2, 2026</p>
-            <p className="text-gray-600 text-sm">A seminar for youth leaders regarding modern Dawah strategies.</p>
-          </div>
+          {upcomingEvents.length === 0 ? (
+            <div className="col-span-full text-gray-400">No upcoming events.</div>
+          ) : upcomingEvents.map(event => (
+            <div key={event.id} className="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col">
+              <div>
+                <span className="bg-rmc-blue text-white text-[10px] font-bold px-2 py-1 rounded uppercase mb-2 inline-block">Event</span>
+                <h4 className="font-bold text-lg text-gray-900 mb-1">{event.title}</h4>
+                <p className="text-sm text-gray-500 mb-3"><i className="fas fa-calendar mr-1"></i> {event.date}</p>
+                <p className="text-gray-600 text-sm mb-4">{event.desc}</p>
+              </div>
+              {event.imageLink && (
+                <div className="mt-auto pt-4">
+                  <img src={event.imageLink} alt="Thumb" className="h-32 w-full object-cover rounded" />
+                </div>
+              )}
+            </div>
+          ))}
         </div>
 
         {/* News & Communications */}
         <h3 className="text-2xl font-bold text-rmc-dark-green mb-6 border-l-4 border-rmc-green pl-3">News & Communications</h3>
         <div className="grid md:grid-cols-2 gap-8 mb-16">
-          <div className="flex gap-4 items-start">
-            <img src="https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg" alt="News Image" className="w-24 h-24 rounded-lg object-cover bg-gray-100 border border-gray-200" />
-            <div>
-              <span className="text-xs font-bold text-rmc-green">Press Release</span>
-              <h4 className="font-bold text-lg text-gray-900 mt-1">Official statement on Ramadan moon sighting</h4>
-              <p className="text-gray-500 text-sm mt-1 line-clamp-2">The office of the Mufti has released the official guidelines for the upcoming holy month...</p>
+          {newsEntries.length === 0 ? (
+            <div className="col-span-full text-gray-400">No recent news.</div>
+          ) : newsEntries.map(news => (
+            <div key={news.id} className="flex gap-4 items-start">
+              <img src={news.imageLink || "https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg"} alt="News Image" className="w-24 h-24 rounded-lg object-cover bg-gray-100 border border-gray-200 flex-shrink-0" />
+              <div>
+                <span className="text-xs font-bold text-rmc-green">Statement</span>
+                <h4 className="font-bold text-lg text-gray-900 mt-1">{news.title}</h4>
+                <p className="text-gray-500 text-xs mb-1">{news.date}</p>
+                <p className="text-gray-500 text-sm mt-1 line-clamp-2">{news.desc}</p>
+                {news.driveLink && (
+                  <a href={news.driveLink} target="_blank" rel="noreferrer" className="text-rmc-blue text-xs font-bold hover:underline mt-2 inline-block">Read Full PDF &rarr;</a>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="flex gap-4 items-start">
-            <img src="https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg" alt="News Image" className="w-24 h-24 rounded-lg object-cover bg-gray-100 border border-gray-200" />
-            <div>
-              <span className="text-xs font-bold text-rmc-green">Community News</span>
-              <h4 className="font-bold text-lg text-gray-900 mt-1">New scholarships awarded to 50 students</h4>
-              <p className="text-gray-500 text-sm mt-1 line-clamp-2">In partnership with external universities, the RMC has officially distributed...</p>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Past Events */}
         <h3 className="text-2xl font-bold text-gray-500 mb-6 border-l-4 border-gray-400 pl-3">Past Events</h3>
         <div className="grid md:grid-cols-3 gap-6 opacity-80">
-          <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
-            <img src="https://i.postimg.cc/Y2L18bht/MUSABAQAT_1.jpg" alt="Past Event" className="w-full h-32 object-cover grayscale transition hover:grayscale-0" />
-            <div className="p-4">
-              <h4 className="font-bold text-gray-800">Qur'an Recitation Competition 2025</h4>
-              <p className="text-xs text-gray-500 mt-1">Concluded successfully with 12 international participants.</p>
+          {pastEvents.length === 0 ? (
+            <div className="col-span-full text-gray-400">No past events recorded.</div>
+          ) : pastEvents.map(event => (
+            <div key={event.id} className="bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
+              {event.imageLink && <img src={event.imageLink} alt="Past Event" className="w-full h-32 object-cover grayscale transition hover:grayscale-0" />}
+              <div className="p-4">
+                <h4 className="font-bold text-gray-800">{event.title}</h4>
+                <p className="text-xs text-gray-500 font-bold mb-1">{event.date}</p>
+                <p className="text-xs text-gray-500 mt-1">{event.desc}</p>
+              </div>
             </div>
-          </div>
-          <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
-            <img src="https://i.postimg.cc/qqg0XNk7/EID_2024.jpg" alt="Past Event" className="w-full h-32 object-cover grayscale transition hover:grayscale-0" />
-            <div className="p-4">
-              <h4 className="font-bold text-gray-800">Eid 2024 Celebrations</h4>
-              <p className="text-xs text-gray-500 mt-1">A look back at the beautiful mass gathering at the stadium.</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

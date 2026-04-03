@@ -1,7 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 const About = ({ t }) => {
   const [openAccordion, setOpenAccordion] = useState(null);
+  
+  const [loading, setLoading] = useState(true);
+  const [board, setBoard] = useState([]);
+  const [partners, setPartners] = useState([]);
+  const [globals, setGlobals] = useState({ mission: "", vision: "", history: "" });
+
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        const [boardSnap, partnersSnap, globalsSnap] = await Promise.all([
+          getDocs(collection(db, "board")),
+          getDocs(collection(db, "partners")),
+          getDoc(doc(db, "globals", "content"))
+        ]);
+
+        setBoard(boardSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setPartners(partnersSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        if (globalsSnap.exists()) {
+          setGlobals(globalsSnap.data());
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAllData();
+  }, []);
 
   const toggleAccordion = (id) => {
     setOpenAccordion(openAccordion === id ? null : id);
@@ -24,12 +54,15 @@ const About = ({ t }) => {
               <i className={`fas ${openAccordion === 'acc-mission' ? 'fa-minus' : 'fa-plus'} text-gray-400`}></i>
             </button>
             <div className="accordion-content bg-white" style={{ maxHeight: openAccordion === 'acc-mission' ? "500px" : "0px" }}>
-              <div className="px-6 pb-5 pt-2 text-gray-600 border-t border-gray-100 prose">
-                <ul className="list-disc pl-5 space-y-2 mt-2">
-                  <li><strong>Spiritual Guidance:</strong> Providing a "path and guidance" for the inhabitants of the world through the teachings of the Quran.</li>
-                  <li><strong>Educational Advancement:</strong> Collaborating with international partners like the Africa Development and Education Foundation (ADEF) to improve religious literacy.</li>
-                  <li><strong>Community Support:</strong> Offering religious resources, such as the translated Quran, free of charge to the public.</li>
-                </ul>
+              <div className="px-6 pb-5 pt-4 text-gray-600 border-t border-gray-100 flex flex-col md:flex-row gap-8">
+                <div className="flex-1">
+                  <h4 className="font-bold text-gray-800 mb-2">Our Mission</h4>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed">{globals.mission}</p>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-gray-800 mb-2">Our Vision</h4>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed">{globals.vision}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -41,10 +74,8 @@ const About = ({ t }) => {
               <i className={`fas ${openAccordion === 'acc-history' ? 'fa-minus' : 'fa-plus'} text-gray-400`}></i>
             </button>
             <div className="accordion-content bg-white" style={{ maxHeight: openAccordion === 'acc-history' ? "500px" : "0px" }}>
-              <div className="px-6 pb-5 pt-2 text-gray-600 border-t border-gray-100 prose">
-                <p>The <strong>Rwanda Muslim Community (RMC)</strong>, formerly known as the Association des Musulmans au Rwanda (AMUR), is the apex body representing the Islamic faith and interests in Rwanda. Historically a marginalized group, the community has seen a significant shift in its social and political standing in the decades following the 1994 Genocide against the Tutsi.</p>
-                <br/>
-                <p>A significant part of its modern history involves the effort to make sacred texts accessible to the Rwandan people in their native language, Kinyarwanda. This journey reached a major milestone with the publication of the first translation of the Quran in 2011, refined in 2020 for higher accuracy.</p>
+              <div className="px-6 pb-5 pt-4 text-gray-600 border-t border-gray-100">
+                <p className="whitespace-pre-wrap text-sm leading-relaxed">{globals.history}</p>
               </div>
             </div>
           </div>
@@ -58,34 +89,15 @@ const About = ({ t }) => {
             <div className="accordion-content bg-white" style={{ maxHeight: openAccordion === 'acc-board' ? "500px" : "0px" }}>
               <div className="px-6 pb-5 pt-4 text-gray-600 border-t border-gray-100">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="flex items-center space-x-4">
-                    <img src="https://i.postimg.cc/yxnB0F4N/mufti.jpg" alt="Mufti" className="w-16 h-16 rounded-full border-2 border-rmc-green object-cover" />
-                    <div>
-                      <h4 className="font-bold text-gray-900">Sheikh SINDAYIGAYA Mussa</h4>
-                      <p className="text-xs text-rmc-green font-bold">Mufti of Rwanda</p>
+                  {board.map(member => (
+                    <div key={member.id} className="flex items-center space-x-4">
+                      <img src={member.imageLink || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"} alt={member.name} className="w-16 h-16 rounded-full border border-gray-200 object-cover" />
+                      <div>
+                        <h4 className="font-bold text-gray-900">{member.name}</h4>
+                        <p className={`text-xs font-bold ${(member.role || '').toLowerCase().includes('mufti') ? 'text-rmc-green' : 'text-gray-500'}`}>{member.role}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <img src="https://i.postimg.cc/cLS2dvVf/yunus.jpg" alt="Deputy Mufti" className="w-16 h-16 rounded-full border-2 border-rmc-blue object-cover" />
-                    <div>
-                      <h4 className="font-bold text-gray-900">Sheikh MUSHUMBA Yunus</h4>
-                      <p className="text-xs text-rmc-blue font-bold">Deputy Mufti</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <img src="https://i.postimg.cc/vZskG4pf/ALLY.jpg" alt="Ameer" className="w-16 h-16 rounded-full border border-gray-200 object-cover" />
-                    <div>
-                      <h4 className="font-bold text-gray-900">Sheikh BAKERA Ally</h4>
-                      <p className="text-xs text-gray-500">Ameer, Foreign Affairs</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <img src="https://i.postimg.cc/sgrq3MtS/ISSA.jpg" alt="Ameer" className="w-16 h-16 rounded-full border border-gray-200 object-cover" />
-                    <div>
-                      <h4 className="font-bold text-gray-900">BICAHAGA Hamidu</h4>
-                      <p className="text-xs text-gray-500">Ameer, Dev Planning</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -98,13 +110,18 @@ const About = ({ t }) => {
               <i className={`fas ${openAccordion === 'acc-partners' ? 'fa-minus' : 'fa-plus'} text-gray-400`}></i>
             </button>
             <div className="accordion-content bg-white" style={{ maxHeight: openAccordion === 'acc-partners' ? "500px" : "0px" }}>
-              <div className="px-6 pb-5 pt-2 text-gray-600 border-t border-gray-100 prose">
-                <p>We work collaboratively with local and international partners to achieve our goals. Notable partners include:</p>
-                <ul className="list-disc pl-5 mt-2">
-                  <li><strong>ADEF:</strong> Africa Development and Education Foundation, instrumental in the translation of the Holy Quran.</li>
-                  <li><strong>National Institutions:</strong> Government ministries regarding health, education, and peace-building initiatives (Ndi Umunyarwanda).</li>
-                  <li><strong>International Islamic Cultural Centers:</strong> Providing educational and infrastructural support.</li>
-                </ul>
+              <div className="px-6 pb-5 pt-4 text-gray-600 border-t border-gray-100">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {partners.map(partner => (
+                    <div key={partner.id} className="flex items-center space-x-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                      <img src={partner.logoLink || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"} alt={partner.name} className="w-16 h-16 object-contain bg-white rounded p-1 shadow-sm" />
+                      <div>
+                        <h4 className="font-bold text-gray-900">{partner.name}</h4>
+                        <p className="text-xs text-rmc-blue font-bold">{partner.sector}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
