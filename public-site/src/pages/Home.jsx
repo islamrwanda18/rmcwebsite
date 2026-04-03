@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
@@ -8,6 +8,9 @@ const Home = ({ t }) => {
   const [slides, setSlides] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
   const [xposts, setXposts] = useState([]);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const socialScrollRef = useRef(null);
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -25,13 +28,19 @@ const Home = ({ t }) => {
         const recentCarousel = [...newsList]
             .sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0))
             .slice(0, 3)
-            .map((n, i) => ({
-               img: n.imageLink || "https://i.postimg.cc/9XwG1JrT/gathering_1.jpg",
-               tagDefault: n.type === "event" ? "Upcoming Event" : "Recent News",
-               colorTag: i === 0 ? "bg-rmc-blue" : i === 1 ? "bg-rmc-dark-green" : "bg-rmc-green",
-               title: n.title,
-               desc: n.desc
-            }));
+            .map((n, i) => {
+               const isEvent = n.type === "event";
+               const isPast = isEvent && n.date && new Date(n.date) < new Date();
+               let tagDefault = "Recent News";
+               if (isEvent) tagDefault = isPast ? "Past Event" : "Upcoming Event";
+               return {
+                 img: n.imageLink || "https://i.postimg.cc/9XwG1JrT/gathering_1.jpg",
+                 tagDefault,
+                 colorTag: isPast ? "bg-gray-500" : i === 0 ? "bg-rmc-blue" : i === 1 ? "bg-rmc-dark-green" : "bg-rmc-green",
+                 title: n.title,
+                 desc: n.desc
+               };
+            });
             
         // Fallback slides if none found
         if (recentCarousel.length === 0) {
@@ -58,6 +67,42 @@ const Home = ({ t }) => {
     };
     fetchHomeData();
   }, []);
+
+  // Reload Twitter widgets when xposts change so embedded images render
+  useEffect(() => {
+    if (xposts.length > 0 && window.twttr && window.twttr.widgets) {
+      window.twttr.widgets.load();
+    }
+  }, [xposts]);
+
+  // Social carousel scroll helpers
+  const updateScrollButtons = useCallback(() => {
+    const el = socialScrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    const el = socialScrollRef.current;
+    if (!el) return;
+    // Initial check after a slight delay for content to render
+    const timer = setTimeout(updateScrollButtons, 500);
+    el.addEventListener("scroll", updateScrollButtons);
+    window.addEventListener("resize", updateScrollButtons);
+    return () => {
+      clearTimeout(timer);
+      el.removeEventListener("scroll", updateScrollButtons);
+      window.removeEventListener("resize", updateScrollButtons);
+    };
+  }, [xposts, updateScrollButtons]);
+
+  const scrollSocial = (direction) => {
+    const el = socialScrollRef.current;
+    if (!el) return;
+    const scrollAmount = el.clientWidth * 0.8;
+    el.scrollBy({ left: direction === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
+  };
 
   useEffect(() => {
     if (slides.length <= 1) return;
@@ -198,22 +243,57 @@ const Home = ({ t }) => {
         </div>
       </div>
 
-      {/* X Post Section */}
+      {/* Social Posts Section — Horizontal Carousel */}
       <div className="bg-gray-100 py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-rmc-black mb-2"><i className="fab fa-twitter text-blue-400 mr-2"></i>Latest from X</h2>
-            <div className="w-24 h-1 bg-blue-400 mx-auto rounded"></div>
+            <h2 className="text-3xl font-bold text-rmc-black mb-2"><i className="fas fa-share-alt text-rmc-green mr-2"></i>Latest from Social Accounts</h2>
+            <div className="w-24 h-1 bg-rmc-green mx-auto rounded"></div>
             <p className="text-gray-500 mt-2 text-sm">Stay connected with our real-time updates.</p>
           </div>
-          
-          <div className="flex flex-col items-center space-y-6">
-            {xposts.length === 0 ? (
-               <p className="text-gray-400">No active posts available.</p>
-            ) : xposts.map(post => (
-               <div key={post.id} className="w-full max-w-[550px]" dangerouslySetInnerHTML={{ __html: post.embedCode }} />
-            ))}
-          </div>
+
+          {xposts.length === 0 ? (
+            <p className="text-gray-400 text-center">No active posts available.</p>
+          ) : (
+            <div className="relative">
+              {/* Left Arrow */}
+              {canScrollLeft && (
+                <button
+                  onClick={() => scrollSocial("left")}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 flex items-center justify-center text-rmc-dark-green transition-all hover:scale-110 -ml-2 md:-ml-4"
+                  aria-label="Scroll left"
+                >
+                  <i className="fas fa-chevron-left text-lg"></i>
+                </button>
+              )}
+
+              {/* Scrollable container */}
+              <div
+                ref={socialScrollRef}
+                className="social-scroll-container flex gap-6 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              >
+                {xposts.map(post => (
+                  <div
+                    key={post.id}
+                    className="social-card flex-shrink-0 snap-start w-[340px] sm:w-[400px] md:w-[450px] bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
+                    dangerouslySetInnerHTML={{ __html: post.embedCode }}
+                  />
+                ))}
+              </div>
+
+              {/* Right Arrow */}
+              {canScrollRight && (
+                <button
+                  onClick={() => scrollSocial("right")}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 flex items-center justify-center text-rmc-dark-green transition-all hover:scale-110 -mr-2 md:-mr-4"
+                  aria-label="Scroll right"
+                >
+                  <i className="fas fa-chevron-right text-lg"></i>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

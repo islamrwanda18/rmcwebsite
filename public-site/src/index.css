@@ -84,4 +84,13 @@
       overflow: hidden;
       transition: max-height 0.4s ease-in-out;
   }
+
+  /* Social horizontal scroll — hide scrollbar */
+  .social-scroll-container::-webkit-scrollbar {
+      display: none;
+  }
+  .social-scroll-container {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+  }
 }

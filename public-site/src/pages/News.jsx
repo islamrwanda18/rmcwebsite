@@ -82,13 +82,14 @@ const News = ({ t }) => {
 
         {/* Past Events */}
         <h3 className="text-2xl font-bold text-gray-500 mb-6 border-l-4 border-gray-400 pl-3">Past Events</h3>
-        <div className="grid md:grid-cols-3 gap-6 opacity-80">
+        <div className="grid md:grid-cols-3 gap-6">
           {pastEvents.length === 0 ? (
             <div className="col-span-full text-gray-400">No past events recorded.</div>
           ) : pastEvents.map(event => (
-            <div key={event.id} className="bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
-              {event.imageLink && <img src={event.imageLink} alt="Past Event" className="w-full h-32 object-cover grayscale transition hover:grayscale-0" />}
+            <div key={event.id} className="bg-gray-50 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+              {event.imageLink && <img src={event.imageLink} alt="Past Event" className="w-full h-32 object-cover" />}
               <div className="p-4">
+                <span className="bg-gray-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase mb-2 inline-block">Past Event</span>
                 <h4 className="font-bold text-gray-800">{event.title}</h4>
                 <p className="text-xs text-gray-500 font-bold mb-1">{event.date}</p>
                 <p className="text-xs text-gray-500 mt-1">{event.desc}</p>
