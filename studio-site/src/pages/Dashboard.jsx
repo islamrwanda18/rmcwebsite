@@ -10,6 +10,7 @@ import SingletonCMS from "../components/cms/SingletonCMS";
 import XPostsCMS from "../components/cms/XPostsCMS";
 import FooterCMS from "../components/cms/FooterCMS";
 import HeaderCMS from "../components/cms/HeaderCMS";
+import StatisticsCMS from "../components/cms/StatisticsCMS";
 
 export default function Dashboard() {
   const { userData } = useAuth();
@@ -27,6 +28,7 @@ export default function Dashboard() {
     { id: "board", label: "Board Members", icon: "fa-users" },
     { id: "mission", label: "Mission & Vision", icon: "fa-bullseye" },
     { id: "history", label: "History", icon: "fa-history" },
+    { id: "statistics", label: "Statistics", icon: "fa-chart-bar" },
     { id: "xposts", label: "Latest X Posts", icon: "fa-twitter" }
   ];
 
@@ -140,6 +142,7 @@ export default function Dashboard() {
 
           {activeTab === "footer" && <FooterCMS />}
           {activeTab === "header" && <HeaderCMS />}
+          {activeTab === "statistics" && <StatisticsCMS />}
         </main>
       </div>
 

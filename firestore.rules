@@ -83,6 +83,11 @@ service cloud.firestore {
       allow write: if isMasterAdmin() || isApprovedAdmin();
     }
 
+    match /statistics/{docId} {
+      allow read: if true;
+      allow write: if isMasterAdmin() || isApprovedAdmin();
+    }
+
     match /globals/{docId} {
       allow read: if true;
       allow write: if isMasterAdmin() || isApprovedAdmin();

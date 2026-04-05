@@ -8,6 +8,7 @@ const Home = ({ t, lang }) => {
   const [slides, setSlides] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
   const [xposts, setXposts] = useState([]);
+  const [stats, setStats] = useState([]);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const socialScrollRef = useRef(null);
@@ -15,9 +16,10 @@ const Home = ({ t, lang }) => {
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
-        const [newsSnap, xpostsSnap] = await Promise.all([
+        const [newsSnap, xpostsSnap, statsSnap] = await Promise.all([
           getDocs(collection(db, "news")),
-          getDocs(collection(db, "xposts"))
+          getDocs(collection(db, "xposts")),
+          getDocs(collection(db, "statistics"))
         ]);
 
         const newsList = newsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -61,6 +63,18 @@ const Home = ({ t, lang }) => {
                                .sort((a,b) => b.createdAt - a.createdAt)
                                .slice(0, 6);
         setXposts(activePosts);
+
+        const statsList = statsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (statsList.length > 0) {
+          setStats(statsList.sort((a,b) => (a.order||0) - (b.order||0)));
+        } else {
+          // Hardcoded fallback
+          setStats([
+            { label: t("stat_muslims"), value: "500,000+" },
+            { label: t("stat_schools"), value: "50+" },
+            { label: t("stat_masjids"), value: "500+" }
+          ]);
+        }
       } catch (err) {
         console.error(err);
       }
@@ -238,18 +252,12 @@ const Home = ({ t, lang }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 slide-up text-center text-white">
           <h2 className="text-3xl font-bold mb-12">{t("head_stats")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-gray-400/30">
-            <div className="p-4">
-              <div className="text-5xl font-bold mb-2 tabular-nums">500,000+</div>
-              <div className="text-rmc-green-100 text-lg uppercase tracking-wide">{t("stat_muslims")}</div>
-            </div>
-            <div className="p-4">
-              <div className="text-5xl font-bold mb-2 tabular-nums">50+</div>
-              <div className="text-rmc-green-100 text-lg uppercase tracking-wide">{t("stat_schools")}</div>
-            </div>
-            <div className="p-4">
-              <div className="text-5xl font-bold mb-2 tabular-nums">500+</div>
-              <div className="text-rmc-green-100 text-lg uppercase tracking-wide">{t("stat_masjids")}</div>
-            </div>
+            {stats.map((s, idx) => (
+              <div key={s.id || idx} className="p-4">
+                <div className="text-5xl font-bold mb-2 tabular-nums">{s.value}</div>
+                <div className="text-rmc-green-100 text-lg uppercase tracking-wide">{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
