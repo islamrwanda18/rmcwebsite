@@ -18,43 +18,45 @@ service cloud.firestore {
     // Check if the requesting user has been approved by the master admin
     function isApprovedAdmin() {
       return isAuthenticated() && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.approved == true;
     }
 
     // ─── Users Collection ───────────────────────────────────────────────
     // Stores admin profiles (firstName, lastName, email, approved, etc.)
     match /users/{userId} {
-      // Master admin can read all users; regular users can read their own profile
       allow read: if isMasterAdmin() || (isAuthenticated() && request.auth.uid == userId);
       
-      // A new user can create their own profile during signup,
-      // but they CANNOT set themselves as approved
+      // Allow creation during signup, but must be unapproved by default
       allow create: if isAuthenticated() && 
                        request.auth.uid == userId && 
                        request.resource.data.approved == false;
       
-      // Master admin can update any profile (approve/disable users).
-      // Regular users can update their own profile but CANNOT change their approval status.
+      // Master admin can update anything (approval). 
+      // Users can update their own data but not their approval status.
       allow update: if isMasterAdmin() || 
                        (isAuthenticated() && request.auth.uid == userId && 
                         request.resource.data.approved == resource.data.approved);
-      
-      // Only the master admin can delete user accounts
+                        
       allow delete: if isMasterAdmin();
     }
 
-    // ─── Board Members Collection ───────────────────────────────────────
-    // Only the master admin (islamrwanda18@gmail.com) can manage board members.
-    // Everyone can read.
+    // ─── Site Configuration (Header, Footer) ──────────────────────────
+    // Only the master admin can configure the site's bones.
+    match /siteConfig/{docId} {
+      allow read: if true;
+      allow write: if isMasterAdmin();
+    }
+
+    // ─── Board Members ──────────────────────────────────────────────────
+    // Historically managed by master admin only.
     match /board/{docId} {
       allow read: if true;
       allow write: if isMasterAdmin();
     }
 
-    // ─── Public Content Collections ─────────────────────────────────────
-    // Services, Programs, News, Partners, X Posts
-    // Anyone can read. Approved admins or master admin can write.
+    // ─── CMS Content Collections ────────────────────────────────────────
+    // Services, Programs, News, Partners, XPosts, Globals (Mission/Vision)
+    // Read by everyone, written by any approved admin or master admin.
 
     match /services/{docId} {
       allow read: if true;
@@ -81,11 +83,14 @@ service cloud.firestore {
       allow write: if isMasterAdmin() || isApprovedAdmin();
     }
 
-    // ─── Globals (Singletons: Mission, Vision, History) ─────────────────
     match /globals/{docId} {
       allow read: if true;
       allow write: if isMasterAdmin() || isApprovedAdmin();
     }
 
+    // Default deny for everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }
