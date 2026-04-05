@@ -149,17 +149,18 @@ const Home = ({ t, lang }) => {
     const maxAttempts = 5;
 
     const tryInitWidgets = () => {
+      const container = socialScrollRef.current;
       let twitterFound = !!(window.twttr && window.twttr.widgets);
       let instaFound = !!(window.instgrm && window.instgrm.Embeds);
       let fbFound = !!(window.FB && window.FB.XFBML);
 
-      if (twitterFound) window.twttr.widgets.load();
-      if (instaFound) window.instgrm.Embeds.process();
-      if (fbFound) window.FB.XFBML.parse();
+      if (twitterFound) window.twttr.widgets.load(container);
+      if (instaFound) window.instgrm.Embeds.process(container);
+      if (fbFound) window.FB.XFBML.parse(container);
 
       attempts++;
-      // If any platform isn't ready, try again in 1s, up to maxAttempts
-      if (attempts < maxAttempts && (!twitterFound || !instaFound || !fbFound)) {
+      // If any platform isn't ready, try again in 1s, up to 10 maxAttempts
+      if (attempts < 10 && (!twitterFound || !instaFound || !fbFound)) {
         setTimeout(tryInitWidgets, 1000);
       }
     };
