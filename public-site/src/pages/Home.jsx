@@ -141,26 +141,32 @@ const Home = ({ t, lang }) => {
     fetchHomeData();
   }, []);
 
-  // Reload all social platform widgets when xposts change
+  // Robustly reload all social platform widgets when xposts change
   useEffect(() => {
     if (xposts.length === 0) return;
     
-    const reloadTimer = setTimeout(() => {
-      // Twitter / X
-      if (window.twttr && window.twttr.widgets) {
-        window.twttr.widgets.load();
-      }
-      // Instagram
-      if (window.instgrm && window.instgrm.Embeds) {
-        window.instgrm.Embeds.process();
-      }
-      // Facebook
-      if (window.FB && window.FB.XFBML) {
-        window.FB.XFBML.parse();
-      }
-    }, 300);
+    let attempts = 0;
+    const maxAttempts = 5;
 
-    return () => clearTimeout(reloadTimer);
+    const tryInitWidgets = () => {
+      let twitterFound = !!(window.twttr && window.twttr.widgets);
+      let instaFound = !!(window.instgrm && window.instgrm.Embeds);
+      let fbFound = !!(window.FB && window.FB.XFBML);
+
+      if (twitterFound) window.twttr.widgets.load();
+      if (instaFound) window.instgrm.Embeds.process();
+      if (fbFound) window.FB.XFBML.parse();
+
+      attempts++;
+      // If any platform isn't ready, try again in 1s, up to maxAttempts
+      if (attempts < maxAttempts && (!twitterFound || !instaFound || !fbFound)) {
+        setTimeout(tryInitWidgets, 1000);
+      }
+    };
+
+    // Initial check after a short delay
+    const initialTimer = setTimeout(tryInitWidgets, 300);
+    return () => clearTimeout(initialTimer);
   }, [xposts]);
 
   // Social carousel scroll helpers
