@@ -1,20 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 const Navbar = ({ lang, setLang, t }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [headerData, setHeaderData] = useState(null);
   const location = useLocation();
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
-  
-  const navLinks = [
-    { name: t("nav_home"), path: "/" },
-    { name: t("nav_services"), path: "/services" },
-    { name: t("nav_program"), path: "/program" },
-    { name: t("nav_news"), path: "/news" },
-    { name: t("nav_about"), path: "/about" },
-    { name: t("nav_contact"), path: "/contact" }
-  ];
+
+  useEffect(() => {
+    const fetchHeader = async () => {
+      try {
+        const docRef = doc(db, "siteConfig", "header");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setHeaderData(docSnap.data());
+        }
+      } catch (err) {
+        console.error("Error fetching header config:", err);
+      }
+    };
+    fetchHeader();
+  }, []);
+
+  // Translation key map from path to nav translation key
+  const pathToTranslationKey = {
+    "/": "nav_home",
+    "/services": "nav_services",
+    "/program": "nav_program",
+    "/news": "nav_news",
+    "/about": "nav_about",
+    "/contact": "nav_contact"
+  };
+
+  // Build navLinks from Firestore or defaults
+  const navLinks = headerData?.navLinks
+    ? headerData.navLinks.map(link => ({
+        name: pathToTranslationKey[link.path] ? t(pathToTranslationKey[link.path]) : link.name,
+        path: link.path
+      }))
+    : [
+        { name: t("nav_home"), path: "/" },
+        { name: t("nav_services"), path: "/services" },
+        { name: t("nav_program"), path: "/program" },
+        { name: t("nav_news"), path: "/news" },
+        { name: t("nav_about"), path: "/about" },
+        { name: t("nav_contact"), path: "/contact" }
+      ];
+
+  const logoUrl = headerData?.logoUrl || "https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg";
+  const orgName = headerData?.orgName || "RMC";
+  const orgSubtitle = headerData?.orgSubtitle || "Rwanda Muslim Community";
 
   const handleLinkClick = () => setIsMobileMenuOpen(false);
 
@@ -26,13 +64,13 @@ const Navbar = ({ lang, setLang, t }) => {
           {/* Logo */}
           <Link to="/" className="flex items-center cursor-pointer">
             <img 
-              src="https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg" 
+              src={logoUrl} 
               alt="RMC Logo" 
               className="h-12 w-auto mr-3 rounded-full border border-gray-200" 
             />
             <div>
-              <span className="font-bold text-xl text-rmc-dark-green block leading-tight">RMC</span>
-              <span className="text-xs text-gray-500">Rwanda Muslim Community</span>
+              <span className="font-bold text-xl text-rmc-dark-green block leading-tight">{orgName}</span>
+              <span className="text-xs text-gray-500">{orgSubtitle}</span>
             </div>
           </Link>
           

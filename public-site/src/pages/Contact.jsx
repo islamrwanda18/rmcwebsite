@@ -3,7 +3,7 @@ import { useState } from "react";
 const Contact = ({ t }) => {
   const [mapLoading, setMapLoading] = useState(false);
   const [mapUrl, setMapUrl] = useState("https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1021111.4552097063!2d29.23126749007421!3d-1.9587426861751147!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19c29654e73840e3%3A0x7490b026cbcca103!2sRwanda!5e0!3m2!1sen!2sus!4v1715000000000!5m2!1sen!2sus");
-  const [isMailUsOpen, setIsMailUsOpen] = useState(false);
+
   const [formData, setFormData] = useState({ fname: "", lname: "", email: "", message: "" });
   const [modalData, setModalData] = useState({ show: false, title: "", message: "" });
 
@@ -39,7 +39,6 @@ const Contact = ({ t }) => {
     const encodedText = encodeURIComponent(fullMessage);
     window.open(`https://wa.me/250788565998?text=${encodedText}`, '_blank');
     setFormData({ ...formData, message: "" });
-    setIsMailUsOpen(false);
   };
 
   const sendViaEmail = () => {
@@ -57,7 +56,6 @@ const Contact = ({ t }) => {
       window.location.href = `mailto:${targetEmail}?subject=RMC Portal Inquiry&body=${encodedText}`;
     }
     setFormData({ ...formData, message: "" });
-    setIsMailUsOpen(false);
   };
 
   return (
@@ -133,18 +131,14 @@ const Contact = ({ t }) => {
 
           {/* Right Side: Mail Us Component */}
           <div>
-            <div className="bg-rmc-dark-green rounded-xl shadow-lg p-1 text-center">
-              <button 
-                onClick={() => setIsMailUsOpen(!isMailUsOpen)} 
-                className="w-full py-4 text-white font-bold text-xl flex justify-center items-center focus:outline-none"
-              >
-                <i className="fas fa-envelope mr-3"></i> {t("mail_us")} 
-                <i className={`fas fa-chevron-down ml-3 transition-transform ${isMailUsOpen ? 'rotate-180' : 'rotate-0'}`}></i>
-              </button>
+            <div className="bg-rmc-dark-green rounded-t-xl shadow-lg p-1 text-center">
+              <div className="w-full py-4 text-white font-bold text-xl flex justify-center items-center">
+                <i className="fas fa-envelope mr-3"></i> {t("mail_us")}
+              </div>
             </div>
             
-            {/* Dropdown Form */}
-            <div className="mail-us-dropdown bg-white shadow-xl rounded-b-xl border border-gray-200 mx-2 -mt-2 relative" style={{ maxHeight: isMailUsOpen ? "600px" : "0px" }}>
+            {/* Contact Form - Always Visible */}
+            <div className="bg-white shadow-xl rounded-b-xl border border-gray-200 border-t-0">
               <div className="p-6 pt-8">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>

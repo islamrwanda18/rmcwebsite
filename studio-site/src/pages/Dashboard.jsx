@@ -8,6 +8,8 @@ import NewsCMS from "../components/cms/NewsCMS";
 import BoardCMS from "../components/cms/BoardCMS";
 import SingletonCMS from "../components/cms/SingletonCMS";
 import XPostsCMS from "../components/cms/XPostsCMS";
+import FooterCMS from "../components/cms/FooterCMS";
+import HeaderCMS from "../components/cms/HeaderCMS";
 
 export default function Dashboard() {
   const { userData } = useAuth();
@@ -29,7 +31,11 @@ export default function Dashboard() {
   ];
 
   if (userData?.email === "islamrwanda18@gmail.com") {
-    menuItems.push({ id: "users", label: "Manage Users", icon: "fa-user-shield" });
+    menuItems.push(
+      { id: "footer", label: "Edit Footer", icon: "fa-shoe-prints" },
+      { id: "header", label: "Edit Header", icon: "fa-heading" },
+      { id: "users", label: "Manage Users", icon: "fa-user-shield" }
+    );
   }
 
   return (
@@ -131,6 +137,9 @@ export default function Dashboard() {
           ]} />}
 
           {activeTab === "xposts" && <XPostsCMS />}
+
+          {activeTab === "footer" && <FooterCMS />}
+          {activeTab === "header" && <HeaderCMS />}
         </main>
       </div>
 
