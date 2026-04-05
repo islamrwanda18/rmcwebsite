@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, memo, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
@@ -62,11 +62,13 @@ const StatCounter = ({ value }) => {
   );
 };
 
-const SocialEmbedCard = ({ embedCode }) => {
+const SocialEmbedCard = memo(({ embedCode }) => {
   const cardRef = useRef(null);
 
-  // Clean the embed code by removing any <script> tags
-  const cleanCode = embedCode.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "");
+  // Memoize the cleaning to prevent irrelevant prop changes
+  const cleanCode = useMemo(() => {
+    return embedCode.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "");
+  }, [embedCode]);
 
   useEffect(() => {
     const el = cardRef.current;
@@ -76,22 +78,26 @@ const SocialEmbedCard = ({ embedCode }) => {
     const max = 10;
 
     const init = () => {
-      let done = false;
+      let success = false;
+      
+      // Check if we already have an iframe (don't re-trigger)
+      if (el.querySelector('iframe')) return;
+
       if (window.twttr && window.twttr.widgets) {
         window.twttr.widgets.load(el);
-        done = true;
+        success = true;
       }
       if (window.instgrm && window.instgrm.Embeds) {
         window.instgrm.Embeds.process(el);
-        done = true;
+        success = true;
       }
       if (window.FB && window.FB.XFBML) {
         window.FB.XFBML.parse(el);
-        done = true;
+        success = true;
       }
 
       attempts++;
-      if (!done && attempts < max) {
+      if (!success && attempts < max) {
         setTimeout(init, 1000);
       }
     };
@@ -106,7 +112,7 @@ const SocialEmbedCard = ({ embedCode }) => {
       dangerouslySetInnerHTML={{ __html: cleanCode }}
     />
   );
-};
+});
 
 const Home = ({ t, lang }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -187,19 +193,10 @@ const Home = ({ t, lang }) => {
     fetchHomeData();
   }, []);
 
-  // Robustly reload all social platform widgets when xposts change
-  // Note: Individual cards now handle their own init via SocialEmbedCard
+  // Individual social cards now handle their own init via SocialEmbedCard
+  // which is memoized to prevent re-renders when the hero carousel slides.
   useEffect(() => {
     if (xposts.length === 0) return;
-    
-    // Fallback global re-trigger
-    const timer = setTimeout(() => {
-      if (window.twttr && window.twttr.widgets) window.twttr.widgets.load();
-      if (window.instgrm && window.instgrm.Embeds) window.instgrm.Embeds.process();
-      if (window.FB && window.FB.XFBML) window.FB.XFBML.parse();
-    }, 1000);
-
-    return () => clearTimeout(timer);
   }, [xposts]);
 
   // Social carousel scroll helpers
