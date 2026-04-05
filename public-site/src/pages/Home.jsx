@@ -62,6 +62,52 @@ const StatCounter = ({ value }) => {
   );
 };
 
+const SocialEmbedCard = ({ embedCode }) => {
+  const cardRef = useRef(null);
+
+  // Clean the embed code by removing any <script> tags
+  const cleanCode = embedCode.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "");
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    let attempts = 0;
+    const max = 10;
+
+    const init = () => {
+      let done = false;
+      if (window.twttr && window.twttr.widgets) {
+        window.twttr.widgets.load(el);
+        done = true;
+      }
+      if (window.instgrm && window.instgrm.Embeds) {
+        window.instgrm.Embeds.process(el);
+        done = true;
+      }
+      if (window.FB && window.FB.XFBML) {
+        window.FB.XFBML.parse(el);
+        done = true;
+      }
+
+      attempts++;
+      if (!done && attempts < max) {
+        setTimeout(init, 1000);
+      }
+    };
+
+    init();
+  }, [cleanCode]);
+
+  return (
+    <div 
+      ref={cardRef} 
+      className="social-card flex-shrink-0 snap-start w-[340px] sm:w-[400px] md:w-[450px] bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
+      dangerouslySetInnerHTML={{ __html: cleanCode }}
+    />
+  );
+};
+
 const Home = ({ t, lang }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slides, setSlides] = useState([]);
@@ -142,32 +188,18 @@ const Home = ({ t, lang }) => {
   }, []);
 
   // Robustly reload all social platform widgets when xposts change
+  // Note: Individual cards now handle their own init via SocialEmbedCard
   useEffect(() => {
     if (xposts.length === 0) return;
     
-    let attempts = 0;
-    const maxAttempts = 5;
+    // Fallback global re-trigger
+    const timer = setTimeout(() => {
+      if (window.twttr && window.twttr.widgets) window.twttr.widgets.load();
+      if (window.instgrm && window.instgrm.Embeds) window.instgrm.Embeds.process();
+      if (window.FB && window.FB.XFBML) window.FB.XFBML.parse();
+    }, 1000);
 
-    const tryInitWidgets = () => {
-      const container = socialScrollRef.current;
-      let twitterFound = !!(window.twttr && window.twttr.widgets);
-      let instaFound = !!(window.instgrm && window.instgrm.Embeds);
-      let fbFound = !!(window.FB && window.FB.XFBML);
-
-      if (twitterFound) window.twttr.widgets.load(container);
-      if (instaFound) window.instgrm.Embeds.process(container);
-      if (fbFound) window.FB.XFBML.parse(container);
-
-      attempts++;
-      // If any platform isn't ready, try again in 1s, up to 10 maxAttempts
-      if (attempts < 10 && (!twitterFound || !instaFound || !fbFound)) {
-        setTimeout(tryInitWidgets, 1000);
-      }
-    };
-
-    // Initial check after a short delay
-    const initialTimer = setTimeout(tryInitWidgets, 300);
-    return () => clearTimeout(initialTimer);
+    return () => clearTimeout(timer);
   }, [xposts]);
 
   // Social carousel scroll helpers
@@ -359,11 +391,7 @@ const Home = ({ t, lang }) => {
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
                 {xposts.map(post => (
-                  <div
-                    key={post.id}
-                    className="social-card flex-shrink-0 snap-start w-[340px] sm:w-[400px] md:w-[450px] bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
-                    dangerouslySetInnerHTML={{ __html: post.embedCode }}
-                  />
+                  <SocialEmbedCard key={post.id} embedCode={post.embedCode} />
                 ))}
               </div>
 
