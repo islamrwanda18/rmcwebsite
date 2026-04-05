@@ -50,7 +50,7 @@ const Navbar = ({ lang, setLang, t }) => {
         { name: t("nav_contact"), path: "/contact" }
       ];
 
-  const logoUrl = headerData?.logoUrl || "https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg";
+  const logoUrl = headerData?.logoUrl || "/android-chrome-192x192.png";
   const orgName = headerData?.orgName || "RMC";
   const orgSubtitle = headerData?.orgSubtitle || "Rwanda Muslim Community";
 

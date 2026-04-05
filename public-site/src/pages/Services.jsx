@@ -37,7 +37,7 @@ const Services = ({ t }) => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (
             <a key={service.id || index} href="https://rmc-brown.vercel.app/" target="_blank" rel="noreferrer" className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 block border border-gray-100 flex flex-col h-full">
-              {service.imageLink && service.imageLink !== 'https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg' ? (
+              {service.imageLink && service.imageLink !== '/android-chrome-192x192.png' ? (
                 <div className="h-32 w-full">
                    <img src={service.imageLink} alt={service.title} className="w-full h-full object-cover" />
                 </div>

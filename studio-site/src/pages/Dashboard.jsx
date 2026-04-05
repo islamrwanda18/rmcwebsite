@@ -44,7 +44,7 @@ export default function Dashboard() {
       {/* Sidebar Navigation */}
       <div className="w-64 bg-rmc-dark-green text-white flex flex-col shadow-xl">
         <div className="p-6 border-b border-gray-700 flex items-center">
-            <img src="https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg" alt="RMC Logo" className="h-10 w-10 mr-3 rounded-full bg-white p-0.5" />
+            <img src="/admin/android-chrome-192x192.png" alt="RMC Logo" className="h-10 w-10 mr-3 rounded-full bg-white p-0.5" />
             <div>
               <h1 className="font-bold text-lg leading-tight">RMC Studio</h1>
               <span className="text-xs text-rmc-green font-medium">Content Manager</span>

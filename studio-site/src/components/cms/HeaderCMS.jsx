@@ -11,7 +11,7 @@ const DEFAULT_HEADER = {
     { name: "About Us", path: "/about" },
     { name: "Contact", path: "/contact" }
   ],
-  logoUrl: "https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg",
+  logoUrl: "/android-chrome-192x192.png",
   orgName: "RMC",
   orgSubtitle: "Rwanda Muslim Community"
 };

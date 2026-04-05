@@ -69,7 +69,7 @@ const Footer = ({ t }) => {
           
           {/* Column 1: Brief + Socials */}
           <div>
-            <img src="https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg" alt="RMC Logo" className="h-16 w-16 rounded-full border-2 border-gray-600 mb-4" />
+            <img src="/android-chrome-192x192.png" alt="RMC Logo" className="h-16 w-16 rounded-full border-2 border-gray-600 mb-4" />
             <h3 className="font-bold text-lg mb-3">{t("footer_org")}</h3>
             <p className="text-gray-400 text-sm mb-6 leading-relaxed">{t("footer_desc")}</p>
             <div className="flex space-x-4">

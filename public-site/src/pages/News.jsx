@@ -66,7 +66,7 @@ const News = ({ t }) => {
             <div className="col-span-full text-gray-400">{t("no_recent_news")}</div>
           ) : newsEntries.map(news => (
             <div key={news.id} className="flex gap-4 items-start">
-              <img src={news.imageLink || "https://i.postimg.cc/d1VvFwWH/RMC-LOGO.jpg"} alt="News Image" className="w-24 h-24 rounded-lg object-cover bg-gray-100 border border-gray-200 flex-shrink-0" />
+              <img src={news.imageLink || "/android-chrome-192x192.png"} alt="News Image" className="w-24 h-24 rounded-lg object-cover bg-gray-100 border border-gray-200 flex-shrink-0" />
               <div>
                 <span className="text-xs font-bold text-rmc-green">{t("tag_statement")}</span>
                 <h4 className="font-bold text-lg text-gray-900 mt-1">{news.title}</h4>
