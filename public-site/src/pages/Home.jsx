@@ -3,6 +3,65 @@ import { Link } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 
+const StatCounter = ({ value }) => {
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const counterRef = useRef(null);
+
+  // Extract numeric part and suffix
+  const match = value.match(/([\d,]+)(.*)/);
+  const numericStr = match ? match[1].replace(/,/g, "") : "0";
+  const suffix = match ? match[2] : "";
+  const targetNumber = parseInt(numericStr, 10) || 0;
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (counterRef.current) {
+      observer.observe(counterRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    let startTime;
+    const duration = 2000; // Animation duration in ms
+
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      
+      // Easing function for smoother finish (easeOutQuad)
+      const easedProgress = progress * (2 - progress);
+      
+      setCount(Math.floor(easedProgress * targetNumber));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [isVisible, targetNumber]);
+
+  return (
+    <div ref={counterRef} className="text-5xl font-bold mb-2 tabular-nums">
+      {count.toLocaleString()}{suffix}
+    </div>
+  );
+};
+
 const Home = ({ t, lang }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slides, setSlides] = useState([]);
@@ -254,7 +313,7 @@ const Home = ({ t, lang }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-gray-400/30">
             {stats.map((s, idx) => (
               <div key={s.id || idx} className="p-4">
-                <div className="text-5xl font-bold mb-2 tabular-nums">{s.value}</div>
+                <StatCounter value={s.value} />
                 <div className="text-rmc-green-100 text-lg uppercase tracking-wide">{s.label}</div>
               </div>
             ))}
