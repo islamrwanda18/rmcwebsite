@@ -125,6 +125,7 @@ export default function Dashboard() {
             <BasicCMS collectionName="partners" titleLabel="Partners" fields={[
               { name: "name", label: "Name", type: "text" },
               { name: "logoLink", label: "Logo Image Link (Direct URL)", type: "url" },
+              { name: "websiteLink", label: "Official Website Link (Optional)", type: "url", optional: true },
               { name: "sector", label: "Sector", type: "text" }
             ]} />
           )}

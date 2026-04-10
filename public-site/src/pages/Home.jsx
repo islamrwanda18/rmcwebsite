@@ -355,10 +355,25 @@ const Home = ({ t, lang }) => {
             <h2 className="text-3xl font-bold text-rmc-black mb-2">{t("Our Partners") || "Our Partners"}</h2>
             <div className="w-24 h-1 bg-rmc-blue mx-auto rounded"></div>
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-80 mix-blend-multiply">
-            {partners.map(p => (
-              <img key={p.id} src={p.logoLink} alt={p.name} title={p.sector} className="h-16 md:h-20 object-contain grayscale hover:grayscale-0 transition-all duration-300 transform hover:scale-110" />
-            ))}
+          <div className="flex flex-wrap justify-center items-start gap-8 md:gap-12">
+            {partners.map(p => {
+              const PartnerContent = (
+                <div className="flex flex-col items-center group cursor-pointer transition-transform duration-300">
+                  <div className="h-16 md:h-20 mb-3 flex items-center justify-center">
+                    <img src={p.logoLink} alt={p.name} title={p.sector} className="max-h-full object-contain" />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700 text-center max-w-[120px]">{p.name}</span>
+                </div>
+              );
+
+              return p.websiteLink ? (
+                <a key={p.id} href={p.websiteLink} target="_blank" rel="noopener noreferrer" className="block transform hover:scale-105 transition-transform">
+                  {PartnerContent}
+                </a>
+              ) : (
+                <div key={p.id}>{PartnerContent}</div>
+              );
+            })}
           </div>
         </div>
       </div>
