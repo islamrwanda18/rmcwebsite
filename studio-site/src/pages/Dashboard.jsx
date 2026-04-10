@@ -7,7 +7,7 @@ import BasicCMS from "../components/cms/BasicCMS";
 import NewsCMS from "../components/cms/NewsCMS";
 import BoardCMS from "../components/cms/BoardCMS";
 import SingletonCMS from "../components/cms/SingletonCMS";
-import XPostsCMS from "../components/cms/XPostsCMS";
+import SocialsCMS from "../components/cms/SocialsCMS";
 import FooterCMS from "../components/cms/FooterCMS";
 import HeaderCMS from "../components/cms/HeaderCMS";
 import StatisticsCMS from "../components/cms/StatisticsCMS";
@@ -29,7 +29,7 @@ export default function Dashboard() {
     { id: "mission", label: "Mission & Vision", icon: "fa-bullseye" },
     { id: "history", label: "History", icon: "fa-history" },
     { id: "statistics", label: "Statistics", icon: "fa-chart-bar" },
-    { id: "xposts", label: "Latest X Posts", icon: "fa-twitter" }
+    { id: "socials", label: "Social Accounts", icon: "fa-hashtag" }
   ];
 
   if (userData?.email === "islamrwanda18@gmail.com") {
@@ -138,7 +138,7 @@ export default function Dashboard() {
             { key: "history", label: "RMC History" }
           ]} />}
 
-          {activeTab === "xposts" && <XPostsCMS />}
+          {activeTab === "socials" && <SocialsCMS />}
 
           {activeTab === "footer" && <FooterCMS />}
           {activeTab === "header" && <HeaderCMS />}

@@ -78,7 +78,7 @@ service cloud.firestore {
       allow write: if isMasterAdmin() || isApprovedAdmin();
     }
 
-    match /xposts/{docId} {
+    match /socials/{docId} {
       allow read: if true;
       allow write: if isMasterAdmin() || isApprovedAdmin();
     }

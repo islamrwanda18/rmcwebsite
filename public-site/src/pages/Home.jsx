@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, memo, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 const StatCounter = ({ value }) => {
@@ -114,23 +114,44 @@ const SocialEmbedCard = memo(({ embedCode }) => {
   );
 });
 
+const getYouTubeIframe = (url) => {
+  if (!url) return "";
+  let videoId = "";
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (match && match[1]) {
+    videoId = match[1];
+  }
+  if (!videoId) return "";
+  return `<iframe width="100%" height="450" src="https://www.youtube.com/embed/${videoId}" title="YouTube Center Card" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+};
+
 const Home = ({ t, lang }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slides, setSlides] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
-  const [xposts, setXposts] = useState([]);
+  const [socials, setSocials] = useState({ xEmbed: "", youtubeLink: "", facebookEmbed: "" });
+  const [partners, setPartners] = useState([]);
   const [stats, setStats] = useState([]);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-  const socialScrollRef = useRef(null);
+  const [socialSlideIndex, setSocialSlideIndex] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1024);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const nextSocial = () => setSocialSlideIndex(p => Math.min(p + 1, 2));
+  const prevSocial = () => setSocialSlideIndex(p => Math.max(p - 1, 0));
 
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
-        const [newsSnap, xpostsSnap, statsSnap] = await Promise.all([
+        const [newsSnap, statsSnap, partnersSnap, socialsSnap] = await Promise.all([
           getDocs(collection(db, "news")),
-          getDocs(collection(db, "xposts")),
-          getDocs(collection(db, "statistics"))
+          getDocs(collection(db, "statistics")),
+          getDocs(collection(db, "partners")),
+          getDoc(doc(db, "socials", "accounts"))
         ]);
 
         const newsList = newsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -169,11 +190,12 @@ const Home = ({ t, lang }) => {
         setSlides(recentCarousel);
         setUpcoming(events.slice(0, 3));
 
-        const activePosts = xpostsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
-                               .filter(x => x.status === "on")
-                               .sort((a,b) => b.createdAt - a.createdAt)
-                               .slice(0, 6);
-        setXposts(activePosts);
+        if (partnersSnap) {
+          setPartners(partnersSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        }
+        if (socialsSnap.exists()) {
+          setSocials(socialsSnap.data());
+        }
 
         const statsList = statsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
         if (statsList.length > 0) {
@@ -193,39 +215,7 @@ const Home = ({ t, lang }) => {
     fetchHomeData();
   }, []);
 
-  // Individual social cards now handle their own init via SocialEmbedCard
-  // which is memoized to prevent re-renders when the hero carousel slides.
-  useEffect(() => {
-    if (xposts.length === 0) return;
-  }, [xposts]);
-
-  // Social carousel scroll helpers
-  const updateScrollButtons = useCallback(() => {
-    const el = socialScrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 1);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
-  }, []);
-
-  useEffect(() => {
-    const el = socialScrollRef.current;
-    if (!el) return;
-    const timer = setTimeout(updateScrollButtons, 800);
-    el.addEventListener("scroll", updateScrollButtons);
-    window.addEventListener("resize", updateScrollButtons);
-    return () => {
-      clearTimeout(timer);
-      el.removeEventListener("scroll", updateScrollButtons);
-      window.removeEventListener("resize", updateScrollButtons);
-    };
-  }, [xposts, updateScrollButtons]);
-
-  const scrollSocial = (direction) => {
-    const el = socialScrollRef.current;
-    if (!el) return;
-    const scrollAmount = el.clientWidth * 0.8;
-    el.scrollBy({ left: direction === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
-  };
+  const youtubeFrame = useMemo(() => getYouTubeIframe(socials.youtubeLink), [socials.youtubeLink]);
 
   useEffect(() => {
     if (slides.length <= 1) return;
@@ -357,53 +347,75 @@ const Home = ({ t, lang }) => {
         </div>
       </div>
 
-      {/* Social Posts Section — Horizontal Carousel */}
-      <div className="bg-gray-100 py-16">
+      {/* Our Partners Section */}
+      {partners.length > 0 && (
+      <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-rmc-black mb-2"><i className="fas fa-share-alt text-rmc-green mr-2"></i>{t("head_social")}</h2>
+            <h2 className="text-3xl font-bold text-rmc-black mb-2">{t("Our Partners") || "Our Partners"}</h2>
+            <div className="w-24 h-1 bg-rmc-blue mx-auto rounded"></div>
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-80 mix-blend-multiply">
+            {partners.map(p => (
+              <img key={p.id} src={p.logoLink} alt={p.name} title={p.sector} className="h-16 md:h-20 object-contain grayscale hover:grayscale-0 transition-all duration-300 transform hover:scale-110" />
+            ))}
+          </div>
+        </div>
+      </div>
+      )}
+
+      {/* Social Posts Section — Strict Block Carousel */}
+      <div className="bg-gray-100 py-16 overflow-hidden">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up relative">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-rmc-black mb-2"><i className="fas fa-share-alt text-rmc-green mr-2"></i>{t("Latest from Social Accounts") || "Latest from Social Accounts"}</h2>
             <div className="w-24 h-1 bg-rmc-green mx-auto rounded"></div>
-            <p className="text-gray-500 mt-2 text-sm">{t("social_subtitle")}</p>
           </div>
 
-          {xposts.length === 0 ? (
-            <p className="text-gray-400 text-center">{t("no_posts")}</p>
-          ) : (
-            <div className="relative">
-              {/* Left Arrow */}
-              {canScrollLeft && (
+          <div className="relative mx-auto max-w-[340px] sm:max-w-[400px] md:max-w-none">
+            {/* Left/Right controls (Mobile Only) */}
+            <div className="md:hidden">
+              {socialSlideIndex > 0 && (
                 <button
-                  onClick={() => scrollSocial("left")}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 flex items-center justify-center text-rmc-dark-green transition-all hover:scale-110 -ml-2 md:-ml-4"
-                  aria-label="Scroll left"
+                  onClick={prevSocial}
+                  className="absolute -left-5 top-1/2 -translate-y-1/2 z-20 bg-white/90 shadow-lg rounded-full w-10 h-10 flex items-center justify-center text-rmc-dark-green transition-all"
+                  aria-label="Previous card"
                 >
-                  <i className="fas fa-chevron-left text-lg"></i>
+                  <i className="fas fa-chevron-left"></i>
                 </button>
               )}
-
-              {/* Scrollable container */}
-              <div
-                ref={socialScrollRef}
-                className="social-scroll-container flex gap-6 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory"
-                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-              >
-                {xposts.map(post => (
-                  <SocialEmbedCard key={post.id} embedCode={post.embedCode} />
-                ))}
-              </div>
-
-              {/* Right Arrow */}
-              {canScrollRight && (
+              {socialSlideIndex < 2 && (
                 <button
-                  onClick={() => scrollSocial("right")}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 flex items-center justify-center text-rmc-dark-green transition-all hover:scale-110 -mr-2 md:-mr-4"
-                  aria-label="Scroll right"
+                  onClick={nextSocial}
+                  className="absolute -right-5 top-1/2 -translate-y-1/2 z-20 bg-white/90 shadow-lg rounded-full w-10 h-10 flex items-center justify-center text-rmc-dark-green transition-all"
+                  aria-label="Next card"
                 >
-                  <i className="fas fa-chevron-right text-lg"></i>
+                  <i className="fas fa-chevron-right"></i>
                 </button>
               )}
             </div>
-          )}
+
+            {/* Slider Container properly clipped on mobile, flexed evenly on desktop */}
+            <div className="overflow-hidden md:overflow-visible mx-auto w-full">
+              <div 
+                className="flex transition-transform duration-500 ease-in-out gap-6"
+                style={{ transform: windowWidth < 768 ? `translateX(calc(-${socialSlideIndex * 100}% - ${socialSlideIndex * 1.5}rem))` : 'none' }}
+              >
+                {/* 1. X Card */}
+                <div className="w-full flex-shrink-0 md:flex-1 md:w-auto flex justify-center">
+                   {socials.xEmbed ? <SocialEmbedCard embedCode={socials.xEmbed} className="w-full bg-white rounded-xl shadow-md border border-gray-200" /> : <div className="w-full bg-white rounded-xl shadow-md p-8 text-center text-gray-400">X Post Not Available</div>}
+                </div>
+                {/* 2. YouTube Card */}
+                <div className="w-full flex-shrink-0 md:flex-1 md:w-auto flex justify-center">
+                   {youtubeFrame ? <SocialEmbedCard embedCode={youtubeFrame} className="w-full bg-white rounded-xl shadow-md border border-gray-200" /> : <div className="w-full bg-white rounded-xl shadow-md p-8 text-center text-gray-400">YouTube Not Available</div>}
+                </div>
+                {/* 3. Facebook Card */}
+                <div className="w-full flex-shrink-0 md:flex-1 md:w-auto flex justify-center">
+                   {socials.facebookEmbed ? <SocialEmbedCard embedCode={socials.facebookEmbed} className="w-full bg-white rounded-xl shadow-md border border-gray-200" /> : <div className="w-full bg-white rounded-xl shadow-md p-8 text-center text-gray-400">Facebook Not Available</div>}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
