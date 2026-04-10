@@ -112,15 +112,25 @@ const About = ({ t }) => {
             <div className="accordion-content bg-white" style={{ maxHeight: openAccordion === 'acc-partners' ? "500px" : "0px" }}>
               <div className="px-6 pb-5 pt-4 text-gray-600 border-t border-gray-100">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {partners.map(partner => (
-                    <div key={partner.id} className="flex items-center space-x-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                      <img src={partner.logoLink || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"} alt={partner.name} className="w-16 h-16 object-contain bg-white rounded p-1 shadow-sm" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">{partner.name}</h4>
-                        <p className="text-xs text-rmc-blue font-bold">{partner.sector}</p>
+                  {partners.map(partner => {
+                    const PartnerItem = (
+                      <div className="flex items-center space-x-4 bg-gray-50 p-3 rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer h-full">
+                        <img src={partner.logoLink || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"} alt={partner.name} className="w-16 h-16 object-contain bg-white rounded p-1 shadow-sm" />
+                        <div>
+                          <h4 className="font-bold text-gray-900">{partner.name}</h4>
+                          <p className="text-xs text-rmc-blue font-bold">{partner.sector}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                    
+                    return partner.websiteLink ? (
+                      <a key={partner.id} href={partner.websiteLink} target="_blank" rel="noopener noreferrer" className="block">
+                        {PartnerItem}
+                      </a>
+                    ) : (
+                      <div key={partner.id}>{PartnerItem}</div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
