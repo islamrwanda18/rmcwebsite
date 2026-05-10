@@ -7,6 +7,7 @@ export const translations = {
         nav_news: "News &amp; Events",
         nav_about: "About Us",
         nav_contact: "Contact Us",
+        nav_gallery: "Gallery",
 
         // Section Headings
         head_who_we_are: "Who We Are",
@@ -124,7 +125,17 @@ export const translations = {
         contact_info: "Contact Info",
         footer_location: "Kigali, Rwanda",
         footer_hq: "Headquarters",
-        footer_copyright: "Rwanda Muslim Community. All rights reserved."
+        footer_copyright: "Rwanda Muslim Community. All rights reserved.",
+
+        // Gallery
+        head_gallery: "Gallery",
+        gallery_subtitle: "A visual journey through our events, activities, and community moments.",
+        gallery_tag: "Photo Collection",
+        gallery_photos: "photos",
+        gallery_loading: "Loading gallery...",
+        gallery_error: "Unable to load gallery",
+        gallery_empty: "No photos available yet.",
+        gallery_view: "Click to view"
     },
     rw: {
         nav_home: "Ahabanza",
@@ -133,6 +144,7 @@ export const translations = {
         nav_news: "Amakuru n'Ibirori",
         nav_about: "Ibyerekeye Twe",
         nav_contact: "Twandikire",
+        nav_gallery: "Amafoto",
         head_who_we_are: "Abo Turi Bo",
         head_areas: "Inzego Dukoreramo",
         head_activities: "Ibikorwa n'Ibirori",
@@ -224,7 +236,17 @@ export const translations = {
         contact_info: "Amakuru y'Itumanaho",
         footer_location: "Kigali, Rwanda",
         footer_hq: "Icyicaro Gikuru",
-        footer_copyright: "Umuryango w'Abayisilamu mu Rwanda. Uburenganzira bwose bwihariwe."
+        footer_copyright: "Umuryango w'Abayisilamu mu Rwanda. Uburenganzira bwose bwihariwe.",
+
+        // Gallery
+        head_gallery: "Amafoto",
+        gallery_subtitle: "Urugendo rwo kureba ibyo twagezeho mu birori, ibikorwa n'ibihe by'umuryango.",
+        gallery_tag: "Ikusanyamafoto",
+        gallery_photos: "amafoto",
+        gallery_loading: "Gutegura amafoto...",
+        gallery_error: "Ntibyashobotse gushyira amafoto",
+        gallery_empty: "Nta mafoto ahari.",
+        gallery_view: "Kanda urebe"
     },
     fr: {
         nav_home: "Accueil",
@@ -233,6 +255,7 @@ export const translations = {
         nav_news: "Actualités",
         nav_about: "À Propos",
         nav_contact: "Contact",
+        nav_gallery: "Galerie",
         head_who_we_are: "Qui Sommes-Nous",
         head_areas: "Domaines d'Intervention",
         head_activities: "Activités et Événements",
@@ -324,7 +347,17 @@ export const translations = {
         contact_info: "Coordonnées",
         footer_location: "Kigali, Rwanda",
         footer_hq: "Siège Social",
-        footer_copyright: "Communauté Musulmane du Rwanda. Tous droits réservés."
+        footer_copyright: "Communauté Musulmane du Rwanda. Tous droits réservés.",
+
+        // Gallery
+        head_gallery: "Galerie",
+        gallery_subtitle: "Un voyage visuel à travers nos événements, activités et moments communautaires.",
+        gallery_tag: "Collection Photos",
+        gallery_photos: "photos",
+        gallery_loading: "Chargement de la galerie...",
+        gallery_error: "Impossible de charger la galerie",
+        gallery_empty: "Aucune photo disponible pour le moment.",
+        gallery_view: "Cliquez pour voir"
     },
     sw: {
         nav_home: "Nyumbani",
@@ -333,6 +366,7 @@ export const translations = {
         nav_news: "Habari na Matukio",
         nav_about: "Kuhusu Sisi",
         nav_contact: "Wasiliana Nasi",
+        nav_gallery: "Picha",
         head_who_we_are: "Sisi Ni Nani",
         head_areas: "Maeneo ya Kuingilia Kati",
         head_activities: "Shughuli na Matukio",
@@ -424,7 +458,17 @@ export const translations = {
         contact_info: "Maelezo ya Mawasiliano",
         footer_location: "Kigali, Rwanda",
         footer_hq: "Makao Makuu",
-        footer_copyright: "Jumuiya ya Waislamu ya Rwanda. Haki zote zimehifadhiwa."
+        footer_copyright: "Jumuiya ya Waislamu ya Rwanda. Haki zote zimehifadhiwa.",
+
+        // Gallery
+        head_gallery: "Picha",
+        gallery_subtitle: "Safari ya kuona kupitia matukio yetu, shughuli na wakati wa jamii.",
+        gallery_tag: "Mkusanyiko wa Picha",
+        gallery_photos: "picha",
+        gallery_loading: "Kupakia picha...",
+        gallery_error: "Haiwezekani kupakia picha",
+        gallery_empty: "Hakuna picha zinazopatikana bado.",
+        gallery_view: "Bonyeza kutazama"
     },
     ar: {
         // Navigation
@@ -434,6 +478,7 @@ export const translations = {
         nav_news: "الأخبار والفعاليات",
         nav_about: "من نحن",
         nav_contact: "اتصل بنا",
+        nav_gallery: "معرض الصور",
 
         // Section Headings
         head_who_we_are: "من نحن",
@@ -551,6 +596,16 @@ export const translations = {
         contact_info: "معلومات الاتصال",
         footer_location: "كيغالي، رواندا",
         footer_hq: "المقر الرئيسي",
-        footer_copyright: "المجتمع الإسلامي الرواندي. جميع الحقوق محفوظة."
+        footer_copyright: "المجتمع الإسلامي الرواندي. جميع الحقوق محفوظة.",
+
+        // Gallery
+        head_gallery: "معرض الصور",
+        gallery_subtitle: "رحلة بصرية عبر فعالياتنا وأنشطتنا ولحظاتنا المجتمعية.",
+        gallery_tag: "مجموعة الصور",
+        gallery_photos: "صور",
+        gallery_loading: "جاري تحميل المعرض...",
+        gallery_error: "تعذر تحميل المعرض",
+        gallery_empty: "لا تتوفر صور حتى الآن.",
+        gallery_view: "انقر للعرض"
     }
 };

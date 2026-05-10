@@ -19,6 +19,8 @@ jobs:
       - name: Build public-site
         run: npm run build
         working-directory: public-site
+        env:
+          VITE_GOOGLE_DRIVE_API: ${{ secrets.GOOGLE_DRIVE_API }}
 
       # Build the admin studio (outputs to public-site/dist/admin/)
       - name: Install studio-site dependencies
@@ -28,6 +30,8 @@ jobs:
       - name: Build studio-site
         run: npm run build
         working-directory: studio-site
+        env:
+          VITE_GOOGLE_DRIVE_API: ${{ secrets.GOOGLE_DRIVE_API }}
 
       # Deploy the combined dist/ to Firebase
       - uses: FirebaseExtended/action-hosting-deploy@v0

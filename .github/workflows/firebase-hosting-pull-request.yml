@@ -20,6 +20,8 @@ jobs:
       - name: Build public-site
         run: npm run build
         working-directory: public-site
+        env:
+          VITE_GOOGLE_DRIVE_API: ${{ secrets.GOOGLE_DRIVE_API }}
 
       - name: Install studio-site dependencies
         run: npm ci
@@ -28,6 +30,8 @@ jobs:
       - name: Build studio-site
         run: npm run build
         working-directory: studio-site
+        env:
+          VITE_GOOGLE_DRIVE_API: ${{ secrets.GOOGLE_DRIVE_API }}
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:

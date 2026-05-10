@@ -11,6 +11,7 @@ import SocialsCMS from "../components/cms/SocialsCMS";
 import FooterCMS from "../components/cms/FooterCMS";
 import HeaderCMS from "../components/cms/HeaderCMS";
 import StatisticsCMS from "../components/cms/StatisticsCMS";
+import GalleryCMS from "../components/cms/GalleryCMS";
 
 export default function Dashboard() {
   const { userData } = useAuth();
@@ -29,7 +30,8 @@ export default function Dashboard() {
     { id: "mission", label: "Mission & Vision", icon: "fa-bullseye" },
     { id: "history", label: "History", icon: "fa-history" },
     { id: "statistics", label: "Statistics", icon: "fa-chart-bar" },
-    { id: "socials", label: "Social Accounts", icon: "fa-hashtag" }
+    { id: "socials", label: "Social Accounts", icon: "fa-hashtag" },
+    { id: "gallery", label: "Gallery", icon: "fa-images" }
   ];
 
   if (userData?.email === "islamrwanda18@gmail.com") {
@@ -144,6 +146,7 @@ export default function Dashboard() {
           {activeTab === "footer" && <FooterCMS />}
           {activeTab === "header" && <HeaderCMS />}
           {activeTab === "statistics" && <StatisticsCMS />}
+          {activeTab === "gallery" && <GalleryCMS />}
         </main>
       </div>
 

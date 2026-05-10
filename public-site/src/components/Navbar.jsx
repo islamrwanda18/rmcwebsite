@@ -32,7 +32,8 @@ const Navbar = ({ lang, setLang, t }) => {
     "/program": "nav_program",
     "/news": "nav_news",
     "/about": "nav_about",
-    "/contact": "nav_contact"
+    "/contact": "nav_contact",
+    "/gallery": "nav_gallery"
   };
 
   // Build navLinks from Firestore or defaults
@@ -47,7 +48,8 @@ const Navbar = ({ lang, setLang, t }) => {
         { name: t("nav_program"), path: "/program" },
         { name: t("nav_news"), path: "/news" },
         { name: t("nav_about"), path: "/about" },
-        { name: t("nav_contact"), path: "/contact" }
+        { name: t("nav_contact"), path: "/contact" },
+        { name: t("nav_gallery"), path: "/gallery" }
       ];
 
   const logoUrl = headerData?.logoUrl || "/android-chrome-192x192.png";

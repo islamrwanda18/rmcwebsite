@@ -8,6 +8,7 @@ import Program from "./pages/Program";
 import News from "./pages/News";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Gallery from "./pages/Gallery";
 import { translations } from "./translations";
 import "./index.css";
 
@@ -45,6 +46,7 @@ function App() {
             <Route path="/news" element={<News t={t} />} />
             <Route path="/about" element={<About t={t} />} />
             <Route path="/contact" element={<Contact t={t} />} />
+            <Route path="/gallery" element={<Gallery t={t} />} />
           </Routes>
         </main>
         
