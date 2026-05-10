@@ -125,7 +125,7 @@ const getYouTubeIframe = (url) => {
   return `<iframe width="100%" height="450" src="https://www.youtube.com/embed/${videoId}" title="YouTube Center Card" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 };
 
-const Home = ({ t, lang }) => {
+const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slides, setSlides] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
@@ -165,11 +165,11 @@ const Home = ({ t, lang }) => {
             .map((n, i) => {
                const isEvent = n.type === "event";
                const isPast = isEvent && n.date && new Date(n.date) < new Date();
-               let tagKey = "tag_recent_news";
-               if (isEvent) tagKey = isPast ? "tag_past_event" : "tag_upcoming_event";
+               let tag = "Recent News";
+               if (isEvent) tag = isPast ? "Past Event" : "Upcoming Event";
                return {
                  img: n.imageLink || "https://i.postimg.cc/9XwG1JrT/gathering_1.jpg",
-                 tagKey,
+                 tag,
                  colorTag: isPast ? "bg-gray-500" : i === 0 ? "bg-rmc-blue" : i === 1 ? "bg-rmc-dark-green" : "bg-rmc-green",
                  title: n.title,
                  desc: n.desc
@@ -180,7 +180,7 @@ const Home = ({ t, lang }) => {
         if (recentCarousel.length === 0) {
            recentCarousel.push({
              img: "https://i.postimg.cc/9XwG1JrT/gathering_1.jpg",
-             tagKey: "tag_latest_update",
+             tag: "Latest Update",
              colorTag: "bg-rmc-blue",
              title: "Welcome to RMC",
              desc: "The Rwanda Muslim Community official portal."
@@ -203,9 +203,9 @@ const Home = ({ t, lang }) => {
         } else {
           // Hardcoded fallback
           setStats([
-            { label: t("stat_muslims"), value: "500,000+" },
-            { label: t("stat_schools"), value: "50+" },
-            { label: t("stat_masjids"), value: "500+" }
+            { label: "Muslims in Rwanda", value: "500,000+" },
+            { label: "Islamic Schools", value: "50+" },
+            { label: "Masjids", value: "500+" }
           ]);
         }
       } catch (err) {
@@ -247,7 +247,7 @@ const Home = ({ t, lang }) => {
                 style={{ backgroundImage: `url('${slide.img}')` }}
               >
                 <div className="carousel-content">
-                  <span className={`${slide.colorTag} text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide mb-2 inline-block`}>{t(slide.tagKey)}</span>
+                  <span className={`${slide.colorTag} text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide mb-2 inline-block`}>{slide.tag}</span>
                   <h3 className="text-3xl md:text-4xl font-bold mb-2">{slide.title}</h3>
                   <p className="text-gray-200 md:text-lg">{slide.desc}</p>
                 </div>
@@ -260,8 +260,10 @@ const Home = ({ t, lang }) => {
       {/* Brief About Section */}
       <div className="bg-white py-12 border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center slide-up">
-          <h2 className="text-2xl font-bold text-rmc-dark-green mb-4">{t("head_who_we_are")}</h2>
-          <p className="text-gray-600 leading-relaxed max-w-3xl mx-auto" dangerouslySetInnerHTML={{ __html: t("home_about_text") }}></p>
+          <h2 className="text-2xl font-bold text-rmc-dark-green mb-4">Who We Are</h2>
+          <p className="text-gray-600 leading-relaxed max-w-3xl mx-auto">
+            The <strong>Rwanda Muslim Community (RMC)</strong> is the apex body representing the Islamic faith and interests in Rwanda. Headquartered in Kigali and operating under the leadership of the Mufti of Rwanda, we are dedicated to spiritual guidance, educational advancement, and the socio-economic development of all Rwandans.
+          </p>
         </div>
       </div>
 
@@ -269,29 +271,29 @@ const Home = ({ t, lang }) => {
       <div className="bg-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-rmc-black mb-2">{t("head_areas")}</h2>
+            <h2 className="text-3xl font-bold text-rmc-black mb-2">Areas of Intervention</h2>
             <div className="w-24 h-1 bg-rmc-green mx-auto rounded"></div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="bg-white p-6 rounded-xl shadow-md text-center hover:-translate-y-1 transition transform border-t-4 border-rmc-blue">
               <div className="w-16 h-16 bg-blue-50 text-rmc-blue rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i className="fas fa-book-open"></i></div>
-              <h3 className="font-bold text-lg mb-2">{t("area_dawah")}</h3>
-              <p className="text-gray-500 text-sm">{t("area_dawah_desc")}</p>
+              <h3 className="font-bold text-lg mb-2">Dawah</h3>
+              <p className="text-gray-500 text-sm">Spreading the true teachings of Islam through peaceful outreach and guidance.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-md text-center hover:-translate-y-1 transition transform border-t-4 border-rmc-green">
               <div className="w-16 h-16 bg-green-50 text-rmc-green rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i className="fas fa-hands-helping"></i></div>
-              <h3 className="font-bold text-lg mb-2">{t("area_socio")}</h3>
-              <p className="text-gray-500 text-sm">{t("area_socio_desc")}</p>
+              <h3 className="font-bold text-lg mb-2">Socio Development</h3>
+              <p className="text-gray-500 text-sm">Empowering communities through health, poverty alleviation, and welfare initiatives.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-md text-center hover:-translate-y-1 transition transform border-t-4 border-yellow-500">
               <div className="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i className="fas fa-graduation-cap"></i></div>
-              <h3 className="font-bold text-lg mb-2">{t("area_education")}</h3>
-              <p className="text-gray-500 text-sm">{t("area_education_desc")}</p>
+              <h3 className="font-bold text-lg mb-2">Education</h3>
+              <p className="text-gray-500 text-sm">Providing quality secular and Islamic education to the youth across the nation.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-md text-center hover:-translate-y-1 transition transform border-t-4 border-rmc-black">
               <div className="w-16 h-16 bg-gray-100 text-rmc-black rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i className="fas fa-globe-africa"></i></div>
-              <h3 className="font-bold text-lg mb-2">{t("area_foreign")}</h3>
-              <p className="text-gray-500 text-sm">{t("area_foreign_desc")}</p>
+              <h3 className="font-bold text-lg mb-2">Foreign Affairs</h3>
+              <p className="text-gray-500 text-sm">Building and maintaining strong international relations and partnerships.</p>
             </div>
           </div>
         </div>
@@ -301,23 +303,23 @@ const Home = ({ t, lang }) => {
       <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-rmc-black mb-2">{t("head_activities")}</h2>
+            <h2 className="text-3xl font-bold text-rmc-black mb-2">Activities and Events</h2>
             <div className="w-24 h-1 bg-rmc-blue mx-auto rounded"></div>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="md:col-span-2 relative rounded-xl overflow-hidden shadow-lg group">
               <img src="https://i.postimg.cc/9XwG1JrT/gathering_1.jpg" alt="Recent Event" className="w-full h-80 object-cover group-hover:scale-105 transition duration-500" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex flex-col justify-end p-6">
-                <span className="bg-rmc-green text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide w-max mb-2">{t("tag_recent_event")}</span>
-                <h3 className="text-2xl font-bold text-white mb-2">{t("activity_title")}</h3>
-                <p className="text-gray-300 text-sm">{t("activity_desc")}</p>
+                <span className="bg-rmc-green text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide w-max mb-2">Recent Event</span>
+                <h3 className="text-2xl font-bold text-white mb-2">National Unity Conference with President</h3>
+                <p className="text-gray-300 text-sm">A major gathering with President focused on community development and interfaith dialogue held recently in Kigali.</p>
               </div>
             </div>
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-              <h3 className="text-xl font-bold mb-4 text-rmc-dark-green"><i className="fas fa-calendar-alt mr-2"></i>{t("upcoming_label")}</h3>
+              <h3 className="text-xl font-bold mb-4 text-rmc-dark-green"><i className="fas fa-calendar-alt mr-2"></i>Upcoming</h3>
               <div className="space-y-4">
                 {upcoming.length === 0 ? (
-                  <p className="text-gray-500 text-sm">{t("no_upcoming")}</p>
+                  <p className="text-gray-500 text-sm">No upcoming events scheduled.</p>
                 ) : upcoming.map(event => (
                   <div key={event.id} className="border-b border-gray-200 pb-4">
                     <p className="text-xs text-rmc-blue font-bold mb-1">{event.date}</p>
@@ -325,7 +327,7 @@ const Home = ({ t, lang }) => {
                   </div>
                 ))}
               </div>
-              <Link to="/news" className="mt-4 block w-full text-center text-sm font-bold text-rmc-green hover:underline">{t("view_all_events")} &rarr;</Link>
+              <Link to="/news" className="mt-4 block w-full text-center text-sm font-bold text-rmc-green hover:underline">View All Events &rarr;</Link>
             </div>
           </div>
         </div>
@@ -335,7 +337,7 @@ const Home = ({ t, lang }) => {
       <div className="relative bg-rmc-dark-green py-16 overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-10 bg-cover bg-center" style={{ backgroundImage: "url('https://i.postimg.cc/7hbDM5xH/EID_2025.jpg')" }}></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 slide-up text-center text-white">
-          <h2 className="text-3xl font-bold mb-12">{t("head_stats")}</h2>
+          <h2 className="text-3xl font-bold mb-12">RMC in Numbers</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-gray-400/30">
             {stats.map((s, idx) => (
               <div key={s.id || idx} className="p-4">
@@ -352,7 +354,7 @@ const Home = ({ t, lang }) => {
       <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-rmc-black mb-2">{t("Our Partners") || "Our Partners"}</h2>
+            <h2 className="text-3xl font-bold text-rmc-black mb-2">Our Partners</h2>
             <div className="w-24 h-1 bg-rmc-blue mx-auto rounded"></div>
           </div>
           <div className="flex flex-wrap justify-center items-start gap-8 md:gap-12">
@@ -383,7 +385,7 @@ const Home = ({ t, lang }) => {
       <div className="bg-gray-100 py-16 overflow-hidden">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up relative">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-rmc-black mb-2"><i className="fas fa-share-alt text-rmc-green mr-2"></i>{t("Latest from Social Accounts") || "Latest from Social Accounts"}</h2>
+            <h2 className="text-3xl font-bold text-rmc-black mb-2"><i className="fas fa-share-alt text-rmc-green mr-2"></i>Latest from Social Accounts</h2>
             <div className="w-24 h-1 bg-rmc-green mx-auto rounded"></div>
           </div>
 

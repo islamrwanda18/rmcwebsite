@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 
-const Program = ({ t }) => {
+const Program = () => {
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,9 +29,9 @@ const Program = ({ t }) => {
     <div className="bg-gray-50 py-16 min-h-screen fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 slide-up">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-rmc-black mb-2">{t("head_program")}</h2>
+          <h2 className="text-4xl font-bold text-rmc-black mb-2">Development Programs</h2>
           <div className="w-24 h-1 bg-rmc-blue mx-auto rounded"></div>
-          <p className="mt-4 text-gray-600">{t("program_subtitle")}</p>
+          <p className="mt-4 text-gray-600">Explore opportunities for growth, learning, and spiritual journey.</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -48,7 +48,7 @@ const Program = ({ t }) => {
                 )}
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">{program.title}</h3>
                 <p className="text-gray-500 mb-6 flex-1">{program.desc}</p>
-                <span className="inline-block bg-rmc-blue text-white px-6 py-2 rounded-full font-bold text-sm group-hover:bg-blue-800 transition mx-auto mt-auto">{t("details_btn")}</span>
+                <span className="inline-block bg-rmc-blue text-white px-6 py-2 rounded-full font-bold text-sm group-hover:bg-blue-800 transition mx-auto mt-auto">Details</span>
               </div>
             </a>
           ))}

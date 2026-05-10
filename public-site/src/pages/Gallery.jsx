@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 const FOLDER_ID = "1kWWqi5uP15fL7pyMYEe3aIKmBxHBQRov";
 const API_KEY = import.meta.env.VITE_GOOGLE_DRIVE_API;
 
-const Gallery = ({ t }) => {
+const Gallery = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -71,7 +71,7 @@ const Gallery = ({ t }) => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <i className="fas fa-spinner fa-spin text-4xl text-rmc-green mb-4 block"></i>
-          <p className="text-gray-500 font-medium">{t("gallery_loading") || "Loading gallery..."}</p>
+          <p className="text-gray-500 font-medium">Loading gallery...</p>
         </div>
       </div>
     );
@@ -82,7 +82,7 @@ const Gallery = ({ t }) => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md px-4">
           <i className="fas fa-exclamation-triangle text-4xl text-amber-500 mb-4 block"></i>
-          <h3 className="text-lg font-bold text-gray-800 mb-2">{t("gallery_error") || "Unable to load gallery"}</h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-2">Unable to load gallery</h3>
           <p className="text-gray-500 text-sm">{error}</p>
         </div>
       </div>
@@ -100,17 +100,17 @@ const Gallery = ({ t }) => {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <span className="inline-block bg-white/15 backdrop-blur-sm text-white text-xs font-bold px-4 py-1.5 rounded-full mb-6 tracking-wider uppercase border border-white/20">
-            <i className="fas fa-images mr-2"></i>{t("gallery_tag") || "Photo Collection"}
+            <i className="fas fa-images mr-2"></i>Photo Collection
           </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">
-            {t("head_gallery") || "Gallery"}
+            Gallery
           </h1>
           <p className="text-emerald-100 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            {t("gallery_subtitle") || "A visual journey through our events, activities, and community moments."}
+            A visual journey through our events, activities, and community moments.
           </p>
           <div className="mt-6 flex items-center justify-center gap-2 text-emerald-200 text-sm">
             <i className="fas fa-camera-retro"></i>
-            <span>{images.length} {t("gallery_photos") || "photos"}</span>
+            <span>{images.length} photos</span>
           </div>
         </div>
       </div>
@@ -120,7 +120,7 @@ const Gallery = ({ t }) => {
         {images.length === 0 ? (
           <div className="text-center py-20">
             <i className="fas fa-image text-6xl text-gray-200 mb-4 block"></i>
-            <p className="text-gray-400 text-lg">{t("gallery_empty") || "No photos available yet."}</p>
+            <p className="text-gray-400 text-lg">No photos available yet.</p>
           </div>
         ) : (
           <div className="gallery-masonry columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
@@ -149,7 +149,7 @@ const Gallery = ({ t }) => {
                       {img.name?.replace(/\.[^/.]+$/, "") || "Photo"}
                     </p>
                     <p className="text-xs text-white/70 mt-1">
-                      <i className="fas fa-expand-alt mr-1"></i>{t("gallery_view") || "Click to view"}
+                      <i className="fas fa-expand-alt mr-1"></i>Click to view
                     </p>
                   </div>
                 </div>

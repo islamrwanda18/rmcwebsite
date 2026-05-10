@@ -3,9 +3,27 @@ import { Link, useLocation } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
-const Navbar = ({ lang, setLang, t }) => {
+const LANG_OPTIONS = [
+  { code: "en", label: "EN", flag: "🇬🇧" },
+  { code: "rw", label: "RW", flag: "🇷🇼" },
+  { code: "fr", label: "FR", flag: "🇫🇷" },
+  { code: "sw", label: "SW", flag: "🇹🇿" },
+  { code: "ar", label: "AR", flag: "🇸🇦" },
+];
+
+const triggerGoogleTranslate = (langCode) => {
+  // Google Translate uses the hidden <select> element to change languages
+  const gtCombo = document.querySelector(".goog-te-combo");
+  if (gtCombo) {
+    gtCombo.value = langCode;
+    gtCombo.dispatchEvent(new Event("change"));
+  }
+};
+
+const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [headerData, setHeaderData] = useState(null);
+  const [currentLang, setCurrentLang] = useState("en");
   const location = useLocation();
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -25,35 +43,35 @@ const Navbar = ({ lang, setLang, t }) => {
     fetchHeader();
   }, []);
 
-  // Translation key map from path to nav translation key
-  const pathToTranslationKey = {
-    "/": "nav_home",
-    "/services": "nav_services",
-    "/program": "nav_program",
-    "/news": "nav_news",
-    "/about": "nav_about",
-    "/contact": "nav_contact",
-    "/gallery": "nav_gallery"
+  const handleLanguageChange = (e) => {
+    const langCode = e.target.value;
+    setCurrentLang(langCode);
+    triggerGoogleTranslate(langCode);
   };
 
-  // Build navLinks from Firestore or defaults, always ensuring Gallery is present
+  // Default nav link names (in English — Google Translate handles the rest)
+  const defaultNavNames = {
+    "/": "Home",
+    "/services": "Services",
+    "/program": "Program",
+    "/news": "News & Events",
+    "/about": "About Us",
+    "/contact": "Contact Us",
+    "/gallery": "Gallery"
+  };
+
+  // Build navLinks from Firestore or defaults
   const baseLinks = headerData?.navLinks
     ? headerData.navLinks.map(link => ({
-        name: pathToTranslationKey[link.path] ? t(pathToTranslationKey[link.path]) : link.name,
+        name: defaultNavNames[link.path] || link.name,
         path: link.path
       }))
-    : [
-        { name: t("nav_home"), path: "/" },
-        { name: t("nav_services"), path: "/services" },
-        { name: t("nav_program"), path: "/program" },
-        { name: t("nav_news"), path: "/news" },
-        { name: t("nav_about"), path: "/about" },
-        { name: t("nav_contact"), path: "/contact" },
-      ];
+    : Object.entries(defaultNavNames).map(([path, name]) => ({ name, path }));
+
   // Always append Gallery if not already in the list
   const navLinks = baseLinks.some(link => link.path === "/gallery")
     ? baseLinks
-    : [...baseLinks, { name: t("nav_gallery"), path: "/gallery" }];
+    : [...baseLinks, { name: "Gallery", path: "/gallery" }];
 
   const logoUrl = headerData?.logoUrl || "/android-chrome-192x192.png";
   const orgName = headerData?.orgName || "RMC";
@@ -87,23 +105,22 @@ const Navbar = ({ lang, setLang, t }) => {
                 to={link.path} 
                 className={`nav-link font-medium transition ${location.pathname === link.path ? 'text-rmc-green font-bold' : 'text-gray-700 hover:text-rmc-green'}`}
               >
-                <span dangerouslySetInnerHTML={{ __html: link.name }}></span>
+                {link.name}
               </Link>
             ))}
           </div>
 
-          {/* Controls: Lang Switcher & Mobile Toggle */}
+          {/* Controls: Language Switcher (Google Translate) & Mobile Toggle */}
           <div className="flex items-center space-x-4">
             <select 
-              value={lang} 
-              onChange={(e) => setLang(e.target.value)} 
-              className="text-sm border border-gray-300 rounded-md py-1 px-2 focus:ring-rmc-green focus:border-rmc-green bg-gray-50 text-gray-600 font-semibold cursor-pointer"
+              value={currentLang} 
+              onChange={handleLanguageChange} 
+              className="text-sm border border-gray-300 rounded-md py-1 px-2 focus:ring-rmc-green focus:border-rmc-green bg-gray-50 text-gray-600 font-semibold cursor-pointer notranslate"
+              id="language-selector"
             >
-              <option value="en">🇬🇧 EN</option>
-              <option value="rw">🇷🇼 RW</option>
-              <option value="fr">🇫🇷 FR</option>
-              <option value="sw">🇹🇿 SW</option>
-              <option value="ar">🇸🇦 AR</option>
+              {LANG_OPTIONS.map(opt => (
+                <option key={opt.code} value={opt.code}>{opt.flag} {opt.label}</option>
+              ))}
             </select>
             
             <button className="lg:hidden text-gray-500 hover:text-rmc-green focus:outline-none" onClick={toggleMobileMenu}>
@@ -123,7 +140,7 @@ const Navbar = ({ lang, setLang, t }) => {
               onClick={handleLinkClick}
               className={`block px-3 py-2 text-base font-medium rounded-md ${location.pathname === link.path ? 'text-rmc-green bg-gray-50' : 'text-gray-700 hover:text-rmc-green hover:bg-gray-50'}`}
             >
-              <span dangerouslySetInnerHTML={{ __html: link.name }}></span>
+              {link.name}
             </Link>
           ))}
         </div>
