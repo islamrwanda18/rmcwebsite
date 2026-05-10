@@ -36,8 +36,8 @@ const Navbar = ({ lang, setLang, t }) => {
     "/gallery": "nav_gallery"
   };
 
-  // Build navLinks from Firestore or defaults
-  const navLinks = headerData?.navLinks
+  // Build navLinks from Firestore or defaults, always ensuring Gallery is present
+  const baseLinks = headerData?.navLinks
     ? headerData.navLinks.map(link => ({
         name: pathToTranslationKey[link.path] ? t(pathToTranslationKey[link.path]) : link.name,
         path: link.path
@@ -49,8 +49,11 @@ const Navbar = ({ lang, setLang, t }) => {
         { name: t("nav_news"), path: "/news" },
         { name: t("nav_about"), path: "/about" },
         { name: t("nav_contact"), path: "/contact" },
-        { name: t("nav_gallery"), path: "/gallery" }
       ];
+  // Always append Gallery if not already in the list
+  const navLinks = baseLinks.some(link => link.path === "/gallery")
+    ? baseLinks
+    : [...baseLinks, { name: t("nav_gallery"), path: "/gallery" }];
 
   const logoUrl = headerData?.logoUrl || "/android-chrome-192x192.png";
   const orgName = headerData?.orgName || "RMC";
