@@ -31,7 +31,8 @@ export default function Dashboard() {
     { id: "history", label: "History", icon: "fa-history" },
     { id: "statistics", label: "Statistics", icon: "fa-chart-bar" },
     { id: "socials", label: "Social Accounts", icon: "fa-hashtag" },
-    { id: "gallery", label: "Gallery", icon: "fa-images" }
+    { id: "gallery", label: "Gallery", icon: "fa-images" },
+    { id: "reports", label: "Reports", icon: "fa-file-alt" }
   ];
 
   if (userData?.email === "islamrwanda18@gmail.com") {
@@ -147,6 +148,15 @@ export default function Dashboard() {
           {activeTab === "header" && <HeaderCMS />}
           {activeTab === "statistics" && <StatisticsCMS />}
           {activeTab === "gallery" && <GalleryCMS />}
+          {activeTab === "reports" && (
+            <BasicCMS collectionName="reports" titleLabel="Reports" fields={[
+              { name: "title", label: "Report Title", type: "text" },
+              { name: "date", label: "Date (e.g., YYYY-MM-DD)", type: "text" },
+              { name: "driveLink", label: "Document Link (PDF/Drive)", type: "url" },
+              { name: "imageLink", label: "Thumbnail Link (Direct Image URL)", type: "url", optional: true },
+              { name: "desc", label: "Description", type: "textarea", wordLimit: 50, optional: true }
+            ]} />
+          )}
         </main>
       </div>
 

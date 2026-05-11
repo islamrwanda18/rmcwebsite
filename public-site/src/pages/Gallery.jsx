@@ -4,7 +4,8 @@ const FOLDER_ID = "1kWWqi5uP15fL7pyMYEe3aIKmBxHBQRov";
 const API_KEY = import.meta.env.VITE_GOOGLE_DRIVE_API;
 
 const Gallery = () => {
-  const [images, setImages] = useState([]);
+  const [allImages, setAllImages] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(30);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lightbox, setLightbox] = useState({ open: false, index: 0 });
@@ -14,11 +15,11 @@ const Gallery = () => {
     const fetchImages = async () => {
       try {
         const res = await fetch(
-          `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType+contains+'image/'&key=${API_KEY}&fields=files(id,name,mimeType,thumbnailLink,imageMediaMetadata)&pageSize=100&orderBy=createdTime desc`
+          `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType+contains+'image/'&key=${API_KEY}&fields=files(id,name,mimeType,thumbnailLink,imageMediaMetadata)&pageSize=1000&orderBy=createdTime desc`
         );
         if (!res.ok) throw new Error("Failed to fetch gallery images");
         const data = await res.json();
-        setImages(data.files || []);
+        setAllImages(data.files || []);
       } catch (err) {
         console.error("Gallery fetch error:", err);
         setError(err.message);
@@ -28,6 +29,12 @@ const Gallery = () => {
     };
     fetchImages();
   }, []);
+
+  const images = allImages.slice(0, visibleCount);
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 30);
+  };
 
   const getImageUrl = (fileId, size = 800) => {
     return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
@@ -110,7 +117,7 @@ const Gallery = () => {
           </p>
           <div className="mt-6 flex items-center justify-center gap-2 text-emerald-200 text-sm">
             <i className="fas fa-camera-retro"></i>
-            <span>{images.length} photos</span>
+            <span>{allImages.length} photos</span>
           </div>
         </div>
       </div>
@@ -155,6 +162,24 @@ const Gallery = () => {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Load More Section */}
+        {allImages.length > 0 && (
+          <div className="mt-12 text-center">
+            {visibleCount < allImages.length ? (
+              <button
+                onClick={handleLoadMore}
+                className="bg-rmc-dark-green text-white font-bold py-3 px-8 rounded-full shadow hover:bg-emerald-800 transition transform hover:-translate-y-1"
+              >
+                View More <i className="fas fa-chevron-down ml-2"></i>
+              </button>
+            ) : (
+              <p className="text-gray-500 font-bold italic border-t border-gray-200 pt-8 inline-block">
+                The End
+              </p>
+            )}
           </div>
         )}
       </div>

@@ -4,20 +4,25 @@ import { db } from "../firebase";
 
 const News = () => {
   const [items, setItems] = useState([]);
+  const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchNews = async () => {
+    const fetchAll = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "news"));
-        setItems(querySnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+        const [newsSnap, reportsSnap] = await Promise.all([
+          getDocs(collection(db, "news")),
+          getDocs(collection(db, "reports"))
+        ]);
+        setItems(newsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setReports(reportsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    fetchNews();
+    fetchAll();
   }, []);
 
   const upcomingEvents = items.filter(i => i.type === "event" && i.date && new Date(i.date) >= new Date());
@@ -74,6 +79,33 @@ const News = () => {
                 <p className="text-gray-500 text-sm mt-1 line-clamp-2">{news.desc}</p>
                 {news.driveLink && (
                   <a href={news.driveLink} target="_blank" rel="noreferrer" className="text-rmc-blue text-xs font-bold hover:underline mt-2 inline-block">Read Full PDF &rarr;</a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Reports Section */}
+        <h3 className="text-2xl font-bold text-rmc-dark-green mb-6 border-l-4 border-rmc-blue pl-3">Reports</h3>
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
+          {reports.length === 0 ? (
+            <div className="col-span-full text-gray-400">No reports available.</div>
+          ) : reports.map(report => (
+            <div key={report.id} className="flex gap-4 items-start bg-gray-50 border border-gray-200 p-4 rounded-xl shadow-sm">
+              {report.imageLink ? (
+                <img src={report.imageLink} alt="Report Thumb" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+              ) : (
+                <div className="w-16 h-16 bg-rmc-blue text-white rounded-lg flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-file-pdf text-2xl"></i>
+                </div>
+              )}
+              <div>
+                <span className="text-xs font-bold text-rmc-blue">Report</span>
+                <h4 className="font-bold text-lg text-gray-900 mt-1">{report.title}</h4>
+                <p className="text-gray-500 text-xs mb-1">{report.date}</p>
+                {report.desc && <p className="text-gray-500 text-sm mt-1 line-clamp-2">{report.desc}</p>}
+                {report.driveLink && (
+                  <a href={report.driveLink} target="_blank" rel="noreferrer" className="text-rmc-green text-xs font-bold hover:underline mt-2 inline-block">Download / View &rarr;</a>
                 )}
               </div>
             </div>
